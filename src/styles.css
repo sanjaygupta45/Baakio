@@ -32,6 +32,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .desktop-layout { min-height: 100vh; display: flex; justify-content: center; align-items: center; gap: 52px; padding: 28px; }
 .desktop-aside { width: 290px; align-self: center; color: #436257; }
 .desktop-aside h1 { color: var(--forest); font-size: 48px; letter-spacing: -2px; margin: 0 0 8px; }
+.desktop-wordmark { display: block; width: 225px; max-width: 100%; height: auto; }
 .desktop-aside p { line-height: 1.6; font-size: 15px; }
 .desktop-aside .aside-hint { margin-top: 22px; padding: 14px; border: 1px solid #cbdacf; border-radius: 15px; background: #f9fcf8; font-size: 13px; }
 .app-frame { width: 410px; max-width: 100%; height: min(900px, calc(100dvh - 56px)); min-height: 540px; overflow: hidden; display: flex; flex-direction: column; position: relative; background: var(--bg); border: 8px solid #203c32; border-radius: 35px; box-shadow: 0 15px 55px #122a201c; }
@@ -40,6 +41,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .brand-block { min-width: 0; }
 .brand { font-size: 26px; letter-spacing: -1px; font-weight: 850; line-height: 1; }
+.brand-on-dark { display: inline-flex; align-items: center; gap: 8px; }
+.brand-on-dark img { display: block; width: 28px; height: 28px; padding: 3px; border-radius: 8px; background: #fff; object-fit: contain; }
 .brand-dot { color: #a2dfb8; }
 .identity { color: #d5e8db; font-size: 12px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top-actions { display: flex; gap: 7px; flex-shrink: 0; }
@@ -167,6 +170,7 @@ textarea.control { min-height: 74px; resize: vertical; }
 .landing-header { position: sticky; top: 0; z-index: 30; background: #fff; border-bottom: 1px solid #e8eee9; }
 .landing-header-inner { width: min(1240px, calc(100% - 64px)); min-height: 78px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
 .landing-brand { display: inline-flex; flex-direction: column; color: #123d34; text-decoration: none; flex: 0 0 auto; }
+.landing-wordmark { display: block; width: 158px; max-width: 100%; height: auto; }
 .landing-brand > span { font-size: 28px; line-height: 1; font-weight: 850; letter-spacing: -1.2px; }
 .landing-brand-dot { color: #36a77b; }
 .landing-brand small { margin-top: 4px; color: #60756c; font-size: 10px; font-weight: 600; }
@@ -312,6 +316,7 @@ textarea.control { min-height: 74px; resize: vertical; }
 .landing-footer { padding: 27px 0; color: #657a6e; background: #fff; }
 .landing-footer > div { display: flex; align-items: center; gap: 24px; }
 .landing-footer .landing-brand { margin-right: auto; }
+.landing-footer .landing-wordmark { width: 133px; }
 .landing-footer .landing-brand > span { font-size: 22px; }
 .landing-footer .landing-brand small { font-size: 9px; }
 .landing-footer p, .landing-footer > div > span { margin: 0; font-size: 11px; }
@@ -402,4 +407,22 @@ textarea.control { min-height: 74px; resize: vertical; }
   .landing-value { gap: 7px; font-size: 10px; }
   .landing-feature-grid { grid-template-columns: 1fr; }
   .landing-feature-card { min-height: 0; }
+}
+
+.scan-state { display: flex; align-items: center; gap: 12px; }
+.scan-state-symbol { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; border-radius: 12px; background: #e8f4eb; color: #24674c; font-size: 21px; font-weight: 800; }
+.scan-file { padding: 8px; }
+.scan-review-grid { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 12px; }
+.scan-original { position: sticky; top: 10px; }
+.scan-original img { display: block; width: 100%; max-height: 70vh; margin-top: 12px; object-fit: contain; border-radius: 10px; background: #f6f7f3; }
+.scan-line { padding: 12px 0 4px; border-top: 1px solid #e4ece6; }
+.scan-line-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; font-size: 13px; }
+.scan-line-fields { display: grid; grid-template-columns: .9fr .8fr 1.1fr; gap: 7px; }
+.scan-line-fields .field { min-width: 0; }
+.scan-uncertain { display: block; margin: -4px 0 10px; color: #9a5f16; }
+.scan-totals { padding: 10px 0 3px; margin: 9px 0; border-top: 1px solid #e4ece6; }
+.scan-total-row { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; font-size: 13px; }
+.scan-total-row strong { font-variant-numeric: tabular-nums; }
+@media (min-width: 900px) {
+  .scan-review-grid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
 }

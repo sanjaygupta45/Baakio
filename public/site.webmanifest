@@ -1,0 +1,18 @@
+{
+  "name": "Baakio",
+  "short_name": "Baakio",
+  "description": "Customer credit and payment tracking for local shops",
+  "start_url": "/app.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f7f3",
+  "theme_color": "#123d34",
+  "icons": [
+    {
+      "src": "/brand/baakio-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

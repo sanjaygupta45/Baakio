@@ -12,3 +12,4 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
 
 .auth-menu-link{display:none}@media(max-width:760px){.header-tools>.btn.auth-start{display:inline-flex;padding:10px 11px;font-size:12px}.header-tools>.btn.auth-login,.header-tools>.btn.demo-link{display:none}.nav-links.open>a.auth-menu-link{display:block}}
+.brand-wordmark{display:block;width:160px;max-width:100%;height:auto}.footer-brand-mark{display:inline-flex;align-items:center;gap:7px}.footer-brand-mark img{display:block;width:28px;height:28px;object-fit:contain}.site-footer .footer-brand-mark strong{color:#fff;font-size:24px;letter-spacing:-1px}

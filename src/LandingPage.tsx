@@ -56,7 +56,7 @@ const english = {
   localTitle: 'Made for local shops.',
   localBody: 'From a small shop to a growing business, keep customer credit clear and easy to follow.',
   pricingTitle: 'Simple pricing for your shop',
-  pricingBody: 'Pricing details are coming soon. Existing users can sign in to Baakio.',
+  pricingBody: 'Pricing details are coming soon. Existing account holders can sign in to Baakio.',
   faqTitle: 'Common questions',
   questionOne: 'What can I track with Baakio?',
   answerOne: 'Customer credit, bills, received payments, and payment promises.',
@@ -176,7 +176,7 @@ export default function LandingPage({ locale, onLocaleChange, onLogin, onRegiste
     <header className="landing-header">
       <div className="landing-header-inner">
         <a className="landing-brand" href="#top" aria-label="Baakio home" onClick={closeMenu}>
-          <span>baakio<span className="landing-brand-dot">.</span></span>
+          <img className="landing-wordmark" src="/brand/baakio-logo.png" alt="Baakio" />
           <small>{copy.tagline}</small>
         </a>
         <button className="landing-menu-toggle" type="button" aria-label={copy.menu} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
@@ -342,6 +342,6 @@ export default function LandingPage({ locale, onLocaleChange, onLogin, onRegiste
       </div>
     </section>
 
-    <footer className="landing-footer"><div className="landing-shell"><a className="landing-brand" href="#top"><span>baakio<span className="landing-brand-dot">.</span></span><small>{copy.tagline}</small></a><p>{copy.footer}</p><nav className="landing-footer-links" aria-label={copy.policies}><a href="/privacy.html">{copy.privacy}</a><a href="/terms.html">{copy.terms}</a></nav><span>© {new Date().getFullYear()} Baakio</span></div></footer>
+    <footer className="landing-footer"><div className="landing-shell"><a className="landing-brand" href="#top"><img className="landing-wordmark" src="/brand/baakio-logo.png" alt="Baakio" /><small>{copy.tagline}</small></a><p>{copy.footer}</p><nav className="landing-footer-links" aria-label={copy.policies}><a href="/privacy.html">{copy.privacy}</a><a href="/terms.html">{copy.terms}</a></nav><span>© {new Date().getFullYear()} Baakio</span></div></footer>
   </main>
 }

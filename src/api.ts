@@ -8,18 +8,19 @@ function csrfCookie(): string | null {
 }
 
 async function csrfToken(): Promise<string> {
-  const cookie = csrfCookie()
+  const sameOrigin = !apiRoot || new URL(apiRoot, window.location.href).origin === window.location.origin
+  const cookie = sameOrigin ? csrfCookie() : null
   if (cookie) return cookie
   const response = await fetch(`${apiRoot}/api/v1/csrf`, { credentials: 'include' })
   if (!response.ok) throw new ApiError('Could not start a secure session.', 'CSRF_UNAVAILABLE')
   const payload = (await response.json()) as { token: string }
-  return csrfCookie() || payload.token
+  return (sameOrigin && csrfCookie()) || payload.token
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const method = (options.method || 'GET').toUpperCase()
   const headers = new Headers(options.headers)
-  if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (options.body && !headers.has('Content-Type') && !(options.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) headers.set('X-XSRF-TOKEN', await csrfToken())
   const response = await fetch(`${apiRoot}${path}`, { ...options, method, headers, credentials: 'include' })
   if (!response.ok) {
@@ -37,10 +38,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
+  getBlob: async (path: string): Promise<Blob> => {
+    const response = await fetch(`${apiRoot}${path}`, { credentials: 'include' })
+    if (!response.ok) {
+      let problem: { detail?: string; code?: string } = {}
+      try { problem = await response.json() as typeof problem } catch { problem = {} }
+      throw new ApiError(problem.detail || `Request failed (${response.status}).`, problem.code || `HTTP_${response.status}`)
+    }
+    return response.blob()
+  },
   post: <T>(path: string, body: unknown, idempotencyKey?: string) => {
     const headers = new Headers()
     if (idempotencyKey) headers.set('Idempotency-Key', idempotencyKey)
     return request<T>(path, { method: 'POST', headers, body: JSON.stringify(body) })
+  },
+  upload: <T>(path: string, body: FormData, idempotencyKey: string) => {
+    const headers = new Headers({ 'Idempotency-Key': idempotencyKey })
+    return request<T>(path, { method: 'POST', headers, body })
   },
   patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
 }

@@ -1,14 +1,13 @@
 export type Locale = 'en-IN' | 'hi-IN'
 
-export interface BusinessOwner {
+export interface AccountHolder {
   id: string
-  phoneNumber: string
+  phoneNumber: string | null
   email: string | null
   displayName: string
   businessId: string
   businessName: string
   preferredLocale: Locale
-  role: string
 }
 
 export interface Customer {
@@ -52,6 +51,43 @@ export interface PurchasePage {
   page: number
   pageSize: number
   total: number
+}
+
+export interface ScanDraftLine {
+  name: string
+  quantity: string
+  unit: string | null
+  unitPrice: string
+  lineTotal: string
+  flags: string[]
+}
+
+export interface ScanDraft {
+  occurredOn: string | null
+  description: string | null
+  discount: string
+  writtenTotal: string
+  calculatedTotal: string
+  lines: ScanDraftLine[]
+  flags: string[]
+}
+
+export interface ScanUpload {
+  scanId: number
+  status: string
+  createdAt: string
+}
+
+export interface ScanStatus {
+  scanId: number
+  customerId: number
+  status: 'QUEUED' | 'PROCESSING' | 'REVIEW_REQUIRED' | 'FAILED' | 'POSTED' | 'CANCELLED' | string
+  attemptCount: number
+  errorCode: string | null
+  imageAvailable: boolean
+  createdAt: string
+  draftVersion: number | null
+  draft: ScanDraft | null
 }
 
 export interface PaymentRecord {
@@ -126,7 +162,7 @@ export interface Business {
   upiVpa: string | null
   upiLinkedMobileE164: string | null
   upiPayeeName: string | null
-  paymentDetailsOwnerConfirmed: boolean
+  paymentDetailsAccountHolderConfirmed: boolean
 }
 
 export interface ReminderPreview {
