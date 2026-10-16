@@ -24,7 +24,10 @@ function loadGoogle(): Promise<GoogleApi> {
       const script = document.createElement('script')
       script.src = 'https://accounts.google.com/gsi/client'
       script.async = true
-      script.onload = () => window.google ? resolve(window.google) : reject(new Error('Google sign-in could not load.'))
+      script.onload = () => {
+        if (window.google) resolve(window.google)
+        else { scriptPromise = null; reject(new Error('Google sign-in could not load.')) }
+      }
       script.onerror = () => { scriptPromise = null; reject(new Error('Google sign-in could not load.')) }
       document.head.appendChild(script)
     })
