@@ -161,6 +161,81 @@ textarea.control { min-height: 74px; resize: vertical; }
   .metric-card { padding: 13px; }
 }
 
+/* Responsive account entry */
+.auth-layout { width: min(1180px, 100%); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(430px, 520px); gap: clamp(36px, 6vw, 100px); align-items: center; padding: 48px 32px; }
+.auth-aside { width: auto; max-width: 480px; }
+.auth-aside .desktop-wordmark { width: 230px; margin-bottom: 12px; }
+.auth-aside h2 { max-width: 480px; margin: 24px 0 28px; color: var(--forest); font-size: clamp(35px, 4vw, 54px); line-height: 1.12; letter-spacing: -.05em; }
+.auth-benefits { display: grid; gap: 13px; margin: 0; padding: 0; list-style: none; }
+.auth-benefits li { display: flex; align-items: center; gap: 11px; color: #355a49; font-size: 15px; font-weight: 700; }
+.auth-benefits li span { width: 26px; height: 26px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; color: #1c7154; background: #d8ecdd; font-size: 14px; }
+.auth-shell { width: 100%; max-width: none; height: auto; min-height: 0; overflow: visible; border: 1px solid #dbe6dd; border-radius: 22px; background: #fff; box-shadow: 0 22px 65px #193a2b14; }
+.auth-shell .topbar { padding: 28px 34px 0; border-radius: 22px 22px 0 0; color: var(--forest); background: #fff; }
+.auth-shell .topbar-row .brand { color: var(--forest); }
+.auth-top-actions { display: flex; align-items: center; gap: 8px; }
+.auth-shell .icon-btn { color: var(--forest); border-color: #d9e7dd; background: #f6faf6; }
+.auth-shell .page-heading { margin-top: 32px; }
+.auth-shell .page-heading h1 { font-size: 30px; letter-spacing: -.04em; line-height: 1.2; }
+.auth-shell .page-heading p { margin-top: 6px; color: var(--muted); font-size: 14px; }
+.auth-shell .screen { overflow: visible; flex: initial; padding: 22px 34px 34px; background: #fff; border-radius: 0 0 22px 22px; }
+.auth-form { margin: 0; padding: 0; border: 0; border-radius: 0; }
+.auth-form .btn-row { gap: 10px; }
+.auth-form .btn-row .btn { min-height: 48px; font-size: 14px; }
+.auth-form .subtle { margin: 18px 0; font-size: 13px; line-height: 1.5; }
+.auth-form .field { margin-bottom: 17px; gap: 8px; }
+.auth-form .field label { font-size: 14px; }
+.auth-form .control { min-height: 50px; font-size: 15px; }
+.auth-form .btn.wide { min-height: 50px; font-size: 14px; }
+
+/* Desktop workspace */
+.app-layout { width: min(1320px, 100%); margin: 0 auto; display: grid; grid-template-columns: 228px minmax(0, 1fr); gap: 20px; align-items: start; padding: 24px; }
+.app-sidebar { position: sticky; top: 24px; align-self: start; width: auto; min-height: calc(100dvh - 48px); padding: 29px 14px; border-radius: 18px; color: white; background: var(--forest); }
+.app-sidebar > .brand { margin: 0 12px; }
+.app-sidebar-shop { margin: 26px 12px 18px; padding: 13px 0; overflow-wrap: anywhere; border-top: 1px solid #ffffff32; border-bottom: 1px solid #ffffff32; color: #d7e9dd; font-size: 13px; font-weight: 700; }
+.app-sidebar-nav { display: grid; gap: 5px; }
+.app-sidebar-link { width: 100%; min-height: 48px; display: flex; align-items: center; gap: 12px; padding: 10px 13px; border: 0; border-radius: 11px; color: #dcece1; background: transparent; font-size: 14px; font-weight: 720; text-align: left; }
+.app-sidebar-link:hover { background: #ffffff16; }
+.app-sidebar-link.active { color: var(--forest); background: #e6f4e9; }
+.app-sidebar-link > span { width: 22px; flex: 0 0 auto; font-size: 19px; line-height: 1; text-align: center; }
+.app-shell { width: 100%; max-width: none; height: auto; min-height: calc(100dvh - 48px); overflow: visible; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 12px 40px #183d2f0d; }
+.app-shell .topbar { padding: 24px 30px 22px; border-radius: 17px 17px 0 0; }
+.app-shell .topbar-row .brand { display: none; }
+.app-shell .page-heading h1 { font-size: 27px; letter-spacing: -.04em; }
+.app-shell .page-heading p { font-size: 14px; }
+.app-shell .screen { width: 100%; max-width: 900px; margin: 0 auto; overflow: visible; padding: 28px 30px 42px; }
+.app-shell .bottom-nav { display: none; }
+.app-shell .toast { position: fixed; bottom: 24px; left: auto; right: 24px; width: min(360px, calc(100vw - 48px)); }
+
+@media (min-width: 768px) and (max-width: 999px) {
+  .auth-layout { display: block; width: min(600px, 100%); padding: 32px 20px; }
+  .auth-aside { display: none; }
+  .app-layout { display: block; padding: 16px; }
+  .app-sidebar { display: none; }
+  .app-shell { width: min(760px, 100%); height: calc(100dvh - 32px); min-height: 0; margin: 0 auto; overflow: hidden; }
+  .app-shell .screen { overflow: auto; }
+  .app-shell .bottom-nav { display: grid; }
+}
+
+@media (max-width: 767px) {
+  .auth-layout, .app-layout { display: block; width: 100%; min-height: 100dvh; padding: 0; }
+  .auth-aside, .app-sidebar { display: none; }
+  .auth-shell { width: 100%; min-height: 100dvh; height: auto; border: 0; border-radius: 0; box-shadow: none; }
+  .auth-shell .topbar { padding: 20px 20px 0; border-radius: 0; }
+  .auth-shell .topbar-row .brand { font-size: 23px; }
+  .auth-shell .page-heading { margin-top: 27px; }
+  .auth-shell .page-heading h1 { font-size: 27px; }
+  .auth-shell .screen { padding: 20px 20px calc(32px + env(safe-area-inset-bottom)); border-radius: 0; }
+  .auth-form .btn-row .btn { min-height: 46px; font-size: 13px; }
+  .app-shell { width: 100%; height: 100dvh; min-height: 0; border: 0; border-radius: 0; box-shadow: none; overflow: hidden; }
+  .app-shell .topbar { padding: 18px 20px 17px; border-radius: 0; }
+  .app-shell .topbar-row .brand { display: inline-flex; }
+  .app-shell .page-heading h1 { font-size: 20px; }
+  .app-shell .page-heading p { font-size: 12px; }
+  .app-shell .screen { overflow: auto; padding: 18px 16px 26px; }
+  .app-shell .bottom-nav { display: grid; }
+  .app-shell .toast { position: absolute; bottom: 88px; left: 16px; right: 16px; width: auto; }
+}
+
 
 /* Public landing page */
 .landing-page { min-height: 100vh; color: #153b32; background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Noto Sans Devanagari', Arial, sans-serif; }

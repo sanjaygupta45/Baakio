@@ -215,14 +215,25 @@ export default function App() {
   const navPage = page === 'account' || page === 'newCustomer' || page === 'purchase' || page === 'payment' || page === 'promise' || page === 'opening' || page === 'reschedule' || page === 'reminder' ? 'customers' : page
   const sharedWithSelected = { ...shared, selectedCustomer }
 
-  return <div className="desktop-layout">
-    <aside className="desktop-aside" aria-label="Baakio">
-      <h1><img className="desktop-wordmark" src="/brand/baakio-logo.png" alt="Baakio" /></h1>
-      <div className="eyebrow">{t('descriptor')}</div>
-      <p>{t('tagline')}</p>
-      <div className="aside-hint">{t('signInHint')}</div>
+  const navigationItems: [Page, string, TranslationKey][] = [
+    ['home', '⌂', 'home'], ['customers', '♙', 'customers'], ['scan', '▣', 'scan'], ['followUps', '◷', 'followUps'],
+  ]
+
+  return <div className="desktop-layout app-layout">
+    <aside className="desktop-aside app-sidebar" aria-label={t('descriptor')}>
+      <div className="brand brand-on-dark"><img src="/brand/baakio-icon.png" alt="" /><span>baakio</span></div>
+      <div className="app-sidebar-shop">{accountHolder.businessName}</div>
+      <nav className="app-sidebar-nav" aria-label={t('descriptor')}>
+        {navigationItems.map(([target, icon, label]) => <button key={target}
+          className={`app-sidebar-link ${navPage === target ? 'active' : ''}`} type="button" aria-current={navPage === target ? 'page' : undefined} onClick={() => setPage(target)}>
+          <span aria-hidden="true">{icon}</span>{t(label)}
+        </button>)}
+        <button className={`app-sidebar-link ${page === 'settings' ? 'active' : ''}`} type="button" aria-current={page === 'settings' ? 'page' : undefined} onClick={() => setPage('settings')}>
+          <span aria-hidden="true">⚙</span>{t('settings')}
+        </button>
+      </nav>
     </aside>
-    <div className="app-frame">
+    <div className="app-frame app-shell">
       <header className="topbar">
         <div className="topbar-row">
           <div className="brand-block">
@@ -262,10 +273,8 @@ export default function App() {
         {page === 'scan' && <ScanPage {...sharedWithSelected} onNavigate={setPage} />}
       </main>
 
-      <nav className="bottom-nav" aria-label={t('home')}>
-        {([
-          ['home', '⌂', 'home'], ['customers', '♙', 'customers'], ['scan', '▣', 'scan'], ['followUps', '◷', 'followUps'],
-        ] as [Page, string, TranslationKey][]).map(([target, icon, label]) => <button key={target}
+      <nav className="bottom-nav" aria-label={t('descriptor')}>
+        {navigationItems.map(([target, icon, label]) => <button key={target}
           className={`nav-item ${navPage === target ? 'active' : ''}`} type="button" onClick={() => setPage(target)}>
           <span className="nav-icon" aria-hidden="true">{icon}</span><span>{t(label)}</span>
         </button>)}
@@ -399,16 +408,27 @@ function LoginScreen({ locale, t, notify, initialPurpose, onSignIn, onLocale, on
     setErrorMessage('')
   }
 
-  return <div className="desktop-layout">
-    <aside className="desktop-aside"><h1><img className="desktop-wordmark" src="/brand/baakio-logo.png" alt="Baakio" /></h1><div className="eyebrow">{t('descriptor')}</div><p>{t('tagline')}</p></aside>
-    <div className="app-frame">
+  return <div className="desktop-layout auth-layout">
+    <aside className="desktop-aside auth-aside">
+      <img className="desktop-wordmark" src="/brand/baakio-logo.png" alt="Baakio" />
+      <div className="eyebrow">{t('descriptor')}</div>
+      <h2>{t('tagline')}</h2>
+      <ul className="auth-benefits">
+        <li><span aria-hidden="true">✓</span>{t('customers')}</li>
+        <li><span aria-hidden="true">✓</span>{t('recordPayment')}</li>
+        <li><span aria-hidden="true">✓</span>{t('followUpTitle')}</li>
+      </ul>
+    </aside>
+    <div className="app-frame auth-shell">
       <header className="topbar"><div className="topbar-row"><div className="brand brand-on-dark"><img src="/brand/baakio-icon.png" alt="" /><span>baakio</span></div>
-        <button className="icon-btn" type="button" onClick={onBack}>{t('back')}</button>
-        <button className="icon-btn" type="button" onClick={() => onLocale(locale === 'en-IN' ? 'hi-IN' : 'en-IN')}>{locale === 'en-IN' ? 'हिन्दी' : 'English'}</button></div>
+        <div className="auth-top-actions">
+          <button className="icon-btn" type="button" onClick={onBack}>{t('back')}</button>
+          <button className="icon-btn" type="button" onClick={() => onLocale(locale === 'en-IN' ? 'hi-IN' : 'en-IN')}>{locale === 'en-IN' ? 'हिन्दी' : 'English'}</button>
+        </div></div>
         <div className="page-heading"><div><h1>{step === 'code' ? t('verifyCode') : purpose === 'LOGIN' ? t('signIn') : t('registerTitle')}</h1><p>{t('descriptor')}</p></div></div>
       </header>
       <main className="screen">
-        <form className="card" onSubmit={(event) => void submit(event)}>
+        <form className="card auth-form" onSubmit={(event) => void submit(event)}>
           {errorMessage && <div className="note error" role="alert">{errorMessage}</div>}
           {step === 'email' ? <>
             <div className="btn-row" role="tablist" aria-label={t('authOptions')}>
