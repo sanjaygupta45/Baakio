@@ -73,9 +73,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .section-row h2 { margin: 0; font-size: 16px; letter-spacing: -.3px; }
 .subtle { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .link-button { border: 0; background: none; padding: 4px; color: var(--forest2); font-size: 12px; font-weight: 800; }
-.person { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.person { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; }
 .avatar { width: 39px; height: 39px; flex-shrink: 0; display: grid; place-items: center; border-radius: 13px; background: #e8f4eb; color: #2d6852; font-weight: 850; }
-.person-copy { min-width: 0; text-align: left; }
+.person-copy { display: flex; min-width: 0; flex-direction: column; text-align: left; }
 .person-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 800; }
 .person-meta { margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.4; }
 .customer-row { width: 100%; min-height: 72px; margin: 0 0 11px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line); border-radius: 17px; background: #fff; color: var(--ink); text-align: left; }
@@ -113,11 +113,11 @@ textarea.control { min-height: 74px; resize: vertical; }
 .note { margin: 0 0 12px; padding: 11px 12px; border: 1px solid #d3e9d9; border-radius: 13px; background: #ecf5ef; color: #2e604c; font-size: 12px; line-height: 1.5; }
 .note.warn { border-color: #fae1c0; background: #fff5e8; color: #87551e; }
 .note.error { border-color: #f3c3bb; background: #fff1ee; color: #99352c; }
-.item-line { display: grid; gap: 6px; align-items: center; margin-bottom: 8px; }
-.item-line .control { min-height: 39px; padding: 8px; font-size: 12px; }
-.item-line { grid-template-columns: 1.2fr .52fr .68fr .78fr 35px; }
-.item-line .line-unit { grid-column: auto; }
-.remove-line { min-height: 36px; border: 1px solid #d3dfd6; border-radius: 10px; background: white; color: var(--forest); }
+.item-line { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .65fr) minmax(0, .75fr) minmax(0, .9fr) 38px; align-items: end; gap: 8px; margin-bottom: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #f8fbf8; }
+.item-line-field { display: flex; min-width: 0; flex-direction: column; gap: 6px; }
+.item-line-field label { color: var(--muted); font-size: 11px; font-weight: 750; }
+.item-line .control { min-width: 0; min-height: 40px; padding: 8px; font-size: 13px; }
+.remove-line { min-height: 40px; border: 1px solid #d3dfd6; border-radius: 10px; background: white; color: var(--forest); font-size: 20px; }
 .item-row { padding: 13px 0; border-top: 1px solid var(--line); }
 .item-row:first-child { border-top: 0; }
 .item-title { font-size: 13px; font-weight: 800; }
@@ -203,6 +203,16 @@ textarea.control { min-height: 74px; resize: vertical; }
 .app-shell .page-heading h1 { font-size: 27px; letter-spacing: -.04em; }
 .app-shell .page-heading p { font-size: 14px; }
 .app-shell .screen { width: 100%; max-width: 900px; margin: 0 auto; overflow: visible; padding: 28px 30px 42px; }
+.app-shell .screen:is(.page-newCustomer, .page-purchase, .page-payment, .page-promise, .page-reschedule, .page-opening, .page-reminder, .page-settings) { max-width: 720px; }
+.app-shell .screen.page-scan:has(.scan-review-grid) { max-width: 980px; }
+.app-shell .screen > .card, .app-shell .screen > form.card { padding: 22px; }
+.app-shell .field label { font-size: 13px; }
+.app-shell .subtle, .app-shell .note { font-size: 13px; }
+.app-shell .control, .app-shell .search-input { min-height: 48px; font-size: 15px; }
+.app-shell .btn { min-height: 46px; font-size: 14px; }
+.app-shell .account-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.app-shell .account-actions .span-two { grid-column: auto; }
+.app-shell .customer-row { min-height: 78px; }
 .app-shell .bottom-nav { display: none; }
 .app-shell .toast { position: fixed; bottom: 24px; left: auto; right: 24px; width: min(360px, calc(100vw - 48px)); }
 
@@ -213,6 +223,7 @@ textarea.control { min-height: 74px; resize: vertical; }
   .app-sidebar { display: none; }
   .app-shell { width: min(760px, 100%); height: calc(100dvh - 32px); min-height: 0; margin: 0 auto; overflow: hidden; }
   .app-shell .screen { overflow: auto; }
+  .app-shell .screen:is(.page-newCustomer, .page-purchase, .page-payment, .page-promise, .page-reschedule, .page-opening, .page-reminder, .page-settings) { max-width: 720px; }
   .app-shell .bottom-nav { display: grid; }
 }
 
@@ -232,8 +243,22 @@ textarea.control { min-height: 74px; resize: vertical; }
   .app-shell .page-heading h1 { font-size: 20px; }
   .app-shell .page-heading p { font-size: 12px; }
   .app-shell .screen { overflow: auto; padding: 18px 16px 26px; }
+  .app-shell .screen > .card, .app-shell .screen > form.card { padding: 15px; }
+  .app-shell .account-actions { grid-template-columns: 1fr 1fr; }
+  .app-shell .account-actions .span-two { grid-column: 1 / -1; }
   .app-shell .bottom-nav { display: grid; }
   .app-shell .toast { position: absolute; bottom: 88px; left: 16px; right: 16px; width: auto; }
+}
+
+@media (max-width: 640px) {
+  .item-line { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .item-line-field:first-child { grid-column: 1 / -1; }
+  .remove-line { grid-column: 2; justify-self: end; width: 42px; }
+  .app-shell .scan-line-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-shell .scan-line-fields .field:last-child { grid-column: 1 / -1; }
+  .app-shell .scan-original { position: static; }
+  .app-shell .scan-original img { max-height: 240px; }
+  .grid-two > .field { min-width: 0; }
 }
 
 
@@ -498,6 +523,6 @@ textarea.control { min-height: 74px; resize: vertical; }
 .scan-totals { padding: 10px 0 3px; margin: 9px 0; border-top: 1px solid #e4ece6; }
 .scan-total-row { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; font-size: 13px; }
 .scan-total-row strong { font-variant-numeric: tabular-nums; }
-@media (min-width: 900px) {
+@media (min-width: 1160px) {
   .scan-review-grid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
 }

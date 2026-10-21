@@ -257,7 +257,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="screen" key={page}>
+      <main className={`screen page-${page}`} key={page}>
         {page === 'home' && <HomePage {...sharedWithSelected} onNavigate={setPage} />}
         {page === 'customers' && <CustomersPage {...sharedWithSelected} onNavigate={setPage} />}
         {page === 'account' && selectedCustomer && <AccountPage {...sharedWithSelected} onNavigate={setPage} onPromise={setSelectedPromise} />}
@@ -604,7 +604,7 @@ function AccountPage({ locale, t, notify, selectedCustomer, refreshKey, onNaviga
       <div className="status-line" style={{ marginTop: 8 }}><strong style={{ fontSize: 21 }}>{money(nearest.remaining, locale)}</strong><span className="subtle">{dateText(nearest.dueDate, locale)}</span></div>
     </div>}
     {!hasBalance && <div className="note">{t('settled')}</div>}
-    <div className="action-grid">
+    <div className="action-grid account-actions">
       <button className="btn" type="button" onClick={() => onNavigate('purchase')}>＋ {t('addPurchase')}</button>
       <button className="btn secondary" type="button" disabled={!hasBalance} onClick={() => { onPromise(null); onNavigate('payment') }}>− {t('recordPayment')}</button>
       <button className="btn soft span-two" type="button" onClick={() => onNavigate('scan')}>▣ {t('scanBillFromAccount')}</button>
@@ -676,7 +676,7 @@ function StatementPanel({ customer, initialLedger, locale, t, notify }: {
     <form className="card" onSubmit={(event) => void submit(event)}>
       <div className="grid-two"><div className="field"><label htmlFor="statement-from">{t('periodFrom')}</label><input className="control" id="statement-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} required /></div>
         <div className="field"><label htmlFor="statement-to">{t('periodTo')}</label><input className="control" id="statement-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} required /></div></div>
-      <button className="btn secondary wide" type="submit" disabled={busy}>{busy ? t('loading') : t('statement')}</button>
+      <button className="btn secondary wide" type="submit" disabled={busy}>{busy ? t('loading') : t('showStatement')}</button>
     </form>
     <section className="card">
       <Split label={t('openingForPeriod')} value={money(ledger.openingAtFrom, locale)} />
@@ -729,10 +729,10 @@ function PurchasePage({ locale, t, notify, onSaved, customer }: SharedProps & { 
     </> : <>
       <div className="form-section">{t('itemized')}</div>
       {lines.map((line, index) => <div className="item-line" key={index}>
-        <input className="control" aria-label={t('itemName')} placeholder={t('itemName')} value={line.name} onChange={(event) => updateLine(index, 'name', event.target.value)} />
-        <input className="control" aria-label={t('quantity')} placeholder="1" type="number" min="0.001" step="0.001" value={line.quantity} onChange={(event) => updateLine(index, 'quantity', event.target.value)} />
-        <input className="control line-unit" aria-label={t('unit')} placeholder={t('unit')} value={line.unit} onChange={(event) => updateLine(index, 'unit', event.target.value)} />
-        <input className="control" aria-label={t('unitPrice')} placeholder="₹" type="number" min="0" step="0.01" value={line.unitPrice} onChange={(event) => updateLine(index, 'unitPrice', event.target.value)} />
+        <div className="item-line-field"><label htmlFor={`item-name-${index}`}>{t('itemName')}</label><input id={`item-name-${index}`} className="control" value={line.name} onChange={(event) => updateLine(index, 'name', event.target.value)} /></div>
+        <div className="item-line-field"><label htmlFor={`item-quantity-${index}`}>{t('quantity')}</label><input id={`item-quantity-${index}`} className="control" type="number" min="0.001" step="0.001" value={line.quantity} onChange={(event) => updateLine(index, 'quantity', event.target.value)} /></div>
+        <div className="item-line-field"><label htmlFor={`item-unit-${index}`}>{t('unit')}</label><input id={`item-unit-${index}`} className="control" value={line.unit} onChange={(event) => updateLine(index, 'unit', event.target.value)} /></div>
+        <div className="item-line-field"><label htmlFor={`item-price-${index}`}>{t('unitPrice')}</label><input id={`item-price-${index}`} className="control" type="number" min="0" step="0.01" value={line.unitPrice} onChange={(event) => updateLine(index, 'unitPrice', event.target.value)} /></div>
         <button className="remove-line" type="button" aria-label={t('remove')} disabled={lines.length < 2} onClick={() => setLines((current) => current.filter((_, row) => row !== index))}>×</button>
       </div>)}
       <button className="btn soft mini" type="button" onClick={() => setLines((current) => [...current, { name: '', quantity: '1', unit: '', unitPrice: '' }])}>＋ {t('addLine')}</button>
@@ -848,7 +848,7 @@ function ReschedulePage({ locale, t, notify, onSaved, commitmentId, selectedCust
     <div className="split-row"><span>{t('dueOn')}</span><strong>{dateText(commitment.dueDate, locale)}</strong></div>
     <div className="field"><label htmlFor="new-promise-date">{t('newPromisedDate')}</label><input id="new-promise-date" className="control" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} required /></div>
     <div className="field"><label htmlFor="reschedule-reason">{t('rescheduleReason')}</label><input id="reschedule-reason" className="control" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={500} /></div>
-    <div className="note">{t('savedReschedule')}</div><button className="btn wide" type="submit" disabled={busy}>{busy ? t('saving') : t('saveChanges')}</button>
+    <div className="note">{t('rescheduleHint')}</div><button className="btn wide" type="submit" disabled={busy}>{busy ? t('saving') : t('saveChanges')}</button>
   </form>
 }
 
@@ -1150,7 +1150,7 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
   }
 
   const selected = customers.find((item) => String(item.id) === customerId)
-  const extracting = scan?.status === 'QUEUED' || scan?.status === 'PROCESSING'
+  const extracting = !scan || scan.status === 'QUEUED' || scan.status === 'PROCESSING'
   const totalMismatch = scan?.draft?.flags.includes('TOTAL_MISMATCH') || scan?.draft?.flags.includes('INVALID_CALCULATED_TOTAL')
   const draftLines = scan?.draft?.lines || []
   return <>
@@ -1170,7 +1170,7 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
     </>}
 
     {scanId !== null && <>
-      <div className="scan-state card" role="status"><span className="scan-state-symbol" aria-hidden="true">{extracting ? '◌' : scan?.status === 'REVIEW_REQUIRED' ? '✓' : '!'}</span><div><strong>{scan?.status === 'REVIEW_REQUIRED' ? t('scanReviewRequired') : extracting ? t(scan.status === 'QUEUED' ? 'scanQueued' : 'scanProcessing') : scan?.status === 'POSTED' ? t('savedPurchase') : t('scanFailed')}</strong><div className="subtle">{selected?.displayName || ''}</div></div></div>
+      <div className="scan-state card" role="status"><span className="scan-state-symbol" aria-hidden="true">{extracting ? '◌' : scan?.status === 'REVIEW_REQUIRED' ? '✓' : '!'}</span><div><strong>{scan?.status === 'REVIEW_REQUIRED' ? t('scanReviewRequired') : extracting ? t(!scan || scan.status === 'QUEUED' ? 'scanQueued' : 'scanProcessing') : scan?.status === 'POSTED' ? t('savedPurchase') : t('scanFailed')}</strong><div className="subtle">{selected?.displayName || ''}</div></div></div>
       {scan?.status === 'FAILED' && <section className="card"><p>{t('scanFailed')}</p><button className="btn wide" type="button" onClick={() => { if (selected) { openCustomer(selected); onNavigate('purchase') } }}>{t('scanManualFallback')}</button></section>}
       {scan?.status === 'REVIEW_REQUIRED' && scan.draft && <form onSubmit={(event) => void confirm(event)}>
         <div className="scan-review-grid">
