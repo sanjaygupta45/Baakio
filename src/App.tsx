@@ -112,6 +112,21 @@ interface SharedProps {
   refreshKey: number
 }
 
+type AppIconName = 'home' | 'customers' | 'scan' | 'followUps' | 'settings' | 'plus' | 'wallet'
+
+function AppIcon({ name, size = 20 }: { name: AppIconName; size?: number }) {
+  const paths: Record<AppIconName, ReactNode> = {
+    home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" /><path d="M9 21v-7h6v7" /></>,
+    customers: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
+    scan: <><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4" /><path d="M4 12h16" /></>,
+    followUps: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
+    settings: <><circle cx="12" cy="12" r="3" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /><circle cx="12" cy="12" r="8" /></>,
+    plus: <><path d="M12 5v14M5 12h14" /></>,
+    wallet: <><rect x="3" y="6" width="18" height="14" rx="2" /><path d="M3 10h18M16 15h2" /></>,
+  }
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>
+}
+
 export default function App() {
   const [accountHolder, setAccountHolder] = useState<AccountHolder | null>(null)
   const [locale, setLocale] = useState<Locale>(getStoredLocale)
@@ -215,8 +230,8 @@ export default function App() {
   const navPage = page === 'account' || page === 'newCustomer' || page === 'purchase' || page === 'payment' || page === 'promise' || page === 'opening' || page === 'reschedule' || page === 'reminder' ? 'customers' : page
   const sharedWithSelected = { ...shared, selectedCustomer }
 
-  const navigationItems: [Page, string, TranslationKey][] = [
-    ['home', '⌂', 'home'], ['customers', '♙', 'customers'], ['scan', '▣', 'scan'], ['followUps', '◷', 'followUps'],
+  const navigationItems: [Page, AppIconName, TranslationKey][] = [
+    ['home', 'home', 'home'], ['customers', 'customers', 'customers'], ['scan', 'scan', 'scan'], ['followUps', 'followUps', 'followUps'],
   ]
 
   return <div className="desktop-layout app-layout">
@@ -226,10 +241,10 @@ export default function App() {
       <nav className="app-sidebar-nav" aria-label={t('descriptor')}>
         {navigationItems.map(([target, icon, label]) => <button key={target}
           className={`app-sidebar-link ${navPage === target ? 'active' : ''}`} type="button" aria-current={navPage === target ? 'page' : undefined} onClick={() => setPage(target)}>
-          <span aria-hidden="true">{icon}</span>{t(label)}
+          <span aria-hidden="true"><AppIcon name={icon} /></span>{t(label)}
         </button>)}
         <button className={`app-sidebar-link ${page === 'settings' ? 'active' : ''}`} type="button" aria-current={page === 'settings' ? 'page' : undefined} onClick={() => setPage('settings')}>
-          <span aria-hidden="true">⚙</span>{t('settings')}
+          <span aria-hidden="true"><AppIcon name="settings" /></span>{t('settings')}
         </button>
       </nav>
     </aside>
@@ -244,7 +259,7 @@ export default function App() {
             <button className="icon-btn" type="button" onClick={() => void changeLocale(locale === 'en-IN' ? 'hi-IN' : 'en-IN')} aria-label={t('appLanguage')}>
               {locale === 'en-IN' ? 'हिन्दी' : 'English'}
             </button>
-            <button className="icon-btn" type="button" onClick={() => setPage('settings')} aria-label={t('settings')}>⚙</button>
+            <button className="icon-btn" type="button" onClick={() => setPage('settings')} aria-label={t('settings')}><AppIcon name="settings" size={17} /></button>
           </div>
         </div>
         <div className="page-heading">
@@ -276,7 +291,7 @@ export default function App() {
       <nav className="bottom-nav" aria-label={t('descriptor')}>
         {navigationItems.map(([target, icon, label]) => <button key={target}
           className={`nav-item ${navPage === target ? 'active' : ''}`} type="button" onClick={() => setPage(target)}>
-          <span className="nav-icon" aria-hidden="true">{icon}</span><span>{t(label)}</span>
+          <span className="nav-icon" aria-hidden="true"><AppIcon name={icon} size={19} /></span><span>{t(label)}</span>
         </button>)}
       </nav>
       {toast && <div className={`toast ${toast.error ? 'error' : ''}`} role={toast.error ? 'alert' : 'status'}>{toast.message}</div>}
@@ -468,25 +483,41 @@ function HomePage({ locale, t, notify, openCustomer, onNavigate }: SharedProps &
   }, [notify, t])
   const customersWithBalance = dashboard?.customersWithOutstanding || 0
   if (busy && !dashboard) return <Loading t={t} />
-  return <>
-    <section className="card hero-card">
-      <div className="eyebrow">{t('totalOutstanding')}</div>
-      <div className="big-money">{money(dashboard?.totalOutstanding || '0', locale)}</div>
-      <div className="hero-description">{customersWithBalance} {t('customersWithDue').toLocaleLowerCase(locale)}</div>
+  return <div className="dashboard">
+    <div className="dashboard-summary">
+      <section className="card hero-card dashboard-balance">
+        <div className="dashboard-card-top"><div className="eyebrow">{t('totalOutstanding')}</div><span className="dashboard-balance-icon"><AppIcon name="wallet" size={21} /></span></div>
+        <div className="big-money">{money(dashboard?.totalOutstanding || '0', locale)}</div>
+        <div className="hero-description">{customersWithBalance} {t('customersWithDue').toLocaleLowerCase(locale)}</div>
+      </section>
+      <div className="card metric-card dashboard-metric dashboard-metric-today">
+        <div className="metric-label">{t('dueToday')}</div>
+        <div className="metric-value">{money(dashboard?.dueTodayAmount || '0', locale)}</div>
+        <span className="badge amber">{dashboard?.dueTodayCount || 0} {t('today').toLocaleLowerCase(locale)}</span>
+      </div>
+      <div className="card metric-card dashboard-metric dashboard-metric-overdue">
+        <div className="metric-label">{t('overdue')}</div>
+        <div className="metric-value">{money(dashboard?.overdueAmount || '0', locale)}</div>
+        <span className="badge red">{dashboard?.overdueCount || 0} {t('pastDue').toLocaleLowerCase(locale)}</span>
+      </div>
+    </div>
+
+    <div className="dashboard-action-row">
+      <button className="btn" type="button" onClick={() => onNavigate('newCustomer')}><AppIcon name="plus" size={18} />{t('addCustomer')}</button>
+      <button className="btn secondary" type="button" onClick={() => onNavigate('scan')}><AppIcon name="scan" size={18} />{t('scan')}</button>
+    </div>
+
+    <section className="dashboard-attention" aria-labelledby="attention-heading">
+      <div className="section-row"><h2 id="attention-heading">{t('customersNeedingAttention')}</h2><button className="link-button" type="button" onClick={() => onNavigate('followUps')}>{t('viewAll')}</button></div>
+      {dashboard?.attentionCustomers.length ? <div className="dashboard-attention-list">{dashboard.attentionCustomers.map((customer) => <CustomerRow key={customer.id} customer={customer} locale={locale} t={t} onClick={() => openCustomer(customer)} />)}</div> :
+        <div className="card dashboard-empty">
+          <span className="dashboard-empty-icon"><AppIcon name="followUps" size={26} /></span>
+          <h3>{t('noAttention')}</h3>
+          <p>{t('noAttentionHint')}</p>
+        </div>}
     </section>
-    <div className="grid-two">
-      <div className="card metric-card"><div className="metric-label">{t('dueToday')}</div><div className="metric-value">{money(dashboard?.dueTodayAmount || '0', locale)}</div><span className="badge amber">{dashboard?.dueTodayCount || 0} {t('today').toLocaleLowerCase(locale)}</span></div>
-      <div className="card metric-card"><div className="metric-label">{t('overdue')}</div><div className="metric-value">{money(dashboard?.overdueAmount || '0', locale)}</div><span className="badge red">{dashboard?.overdueCount || 0} {t('pastDue').toLocaleLowerCase(locale)}</span></div>
-    </div>
-    <div className="action-grid">
-      <button className="btn secondary" type="button" onClick={() => onNavigate('newCustomer')}>＋ {t('addCustomer')}</button>
-      <button className="btn" type="button" onClick={() => onNavigate('scan')}>▣ {t('scan')}</button>
-    </div>
-    <div className="section-row"><h2>{t('customersNeedingAttention')}</h2><button className="link-button" type="button" onClick={() => onNavigate('followUps')}>{t('viewAll')}</button></div>
-    {dashboard?.attentionCustomers.length ? dashboard.attentionCustomers.map((customer) => <CustomerRow key={customer.id} customer={customer} locale={locale} t={t} onClick={() => openCustomer(customer)} />) :
-      <EmptyState icon="☷" title={t('noCustomers')} detail={t('noCustomersHint')} action={<button className="btn soft" type="button" onClick={() => onNavigate('newCustomer')}>{t('addCustomer')}</button>} />}
     {!!dashboard && dashboard.customersWithoutPromise > 0 && <div className="note">{dashboard.customersWithoutPromise} · {t('withoutPromise')}</div>}
-  </>
+  </div>
 }
 
 function CustomersPage({ locale, t, notify, openCustomer, onNavigate }: SharedProps & { onNavigate: (page: Page) => void }) {

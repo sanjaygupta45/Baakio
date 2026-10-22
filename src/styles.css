@@ -261,6 +261,77 @@ textarea.control { min-height: 74px; resize: vertical; }
   .grid-two > .field { min-width: 0; }
 }
 
+/* Dashboard: the three numbers share one visual level and the next step stays close to them. */
+.dashboard-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dashboard-summary .card { min-width: 0; margin: 0; }
+.dashboard-balance { grid-column: 1 / -1; }
+.dashboard-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dashboard-balance-icon { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #ffffff30; border-radius: 11px; color: #dcf2e4; background: #ffffff14; }
+.dashboard-action-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.dashboard-action-row .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 152px; }
+.dashboard-attention .section-row { margin-top: 28px; }
+.dashboard-attention .link-button { display: inline-flex; align-items: center; min-height: 36px; }
+.dashboard-attention-list { padding: 6px 14px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+.dashboard-attention-list .customer-row { margin: 0; border: 0; border-radius: 0; border-bottom: 1px solid var(--line); }
+.dashboard-attention-list .customer-row:last-child { border-bottom: 0; }
+.dashboard-empty { min-height: 206px; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+.dashboard-empty-icon { width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 14px; border-radius: 15px; color: #267151; background: #eaf5ec; }
+.dashboard-empty h3 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+.dashboard-empty p { max-width: 400px; margin: 7px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+@media (min-width: 1000px) {
+  body { background: #ecf1ec; }
+  .app-layout { width: min(1540px, 100%); grid-template-columns: 226px minmax(0, 1fr); gap: 18px; padding: 22px; }
+  .app-sidebar { top: 22px; min-height: calc(100dvh - 44px); padding: 26px 13px; border-radius: 18px; background: #123e33; box-shadow: 0 12px 32px #123d3412; }
+  .app-sidebar > .brand { margin: 0 12px; font-size: 25px; }
+  .app-sidebar-shop { margin: 30px 13px 19px; padding: 16px 0; color: #bcd9c8; font-size: 12px; letter-spacing: .01em; }
+  .app-sidebar-nav { gap: 4px; }
+  .app-sidebar-link { min-height: 45px; gap: 13px; padding: 10px 13px; border-radius: 10px; color: #c4dacd; font-size: 13px; font-weight: 680; }
+  .app-sidebar-link > span { width: 20px; height: 20px; display: grid; place-items: center; }
+  .app-sidebar-link.active { color: #123e33; background: #e8f4eb; box-shadow: 0 1px 2px #061a100d; }
+  .app-shell { min-height: calc(100dvh - 44px); border-color: #dfe9e1; background: #f7f9f6; box-shadow: 0 12px 32px #183d2f0b; }
+  .app-shell .topbar { padding: 28px 38px 27px; border-bottom: 1px solid #e5ece6; border-radius: 17px 17px 0 0; color: var(--ink); background: #fff; }
+  .app-shell .identity { margin: 0; color: #658076; font-size: 12px; font-weight: 650; }
+  .app-shell .top-actions { gap: 8px; }
+  .app-shell .icon-btn { min-height: 37px; min-width: 38px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #dce8df; border-radius: 10px; color: #245445; background: #f8fbf8; font-size: 12px; }
+  .app-shell .icon-btn:hover { border-color: #bad2c0; background: #ecf5ee; }
+  .app-shell .page-heading { margin-top: 18px; }
+  .app-shell .page-heading h1 { font-size: clamp(25px, 2.4vw, 32px); line-height: 1.15; letter-spacing: -.045em; }
+  .app-shell .page-heading p { margin-top: 6px; color: #6e8177; font-size: 13px; }
+  .app-shell .back-btn { color: #327158; }
+  .app-shell .screen { max-width: 1180px; padding: 28px 38px 44px; }
+  .app-shell .screen.page-home { max-width: none; }
+  .dashboard-summary { grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .dashboard-balance { grid-column: auto; }
+  .app-shell .dashboard-summary .card { min-height: 176px; padding: 23px 24px; border-radius: 16px; }
+  .app-shell .dashboard-balance { display: flex; flex-direction: column; justify-content: space-between; background: #144839; border-color: #144839; }
+  .dashboard-balance .eyebrow { font-size: 11px; letter-spacing: .1em; }
+  .dashboard-balance .big-money { margin: 10px 0 3px; font-size: clamp(32px, 3vw, 40px); letter-spacing: -.055em; }
+  .dashboard-balance .hero-description { font-size: 12px; }
+  .dashboard-metric { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; background: #fff; }
+  .dashboard-metric .metric-label { color: #647b70; font-size: 13px; font-weight: 700; }
+  .dashboard-metric .metric-value { margin: 5px 0; color: #193a30; font-size: clamp(26px, 2.3vw, 34px); line-height: 1.1; letter-spacing: -.045em; }
+  .dashboard-metric .badge { padding: 5px 9px; font-size: 11px; }
+  .dashboard-action-row { margin-top: 18px; }
+  .dashboard-action-row .btn { min-width: 174px; min-height: 43px; font-size: 13px; }
+  .dashboard-action-row .btn:hover { background: #21634c; }
+  .dashboard-action-row .btn.secondary:hover { color: #123e33; background: #edf6ef; }
+  .dashboard-attention .section-row { margin: 36px 0 13px; }
+  .dashboard-attention .section-row h2 { font-size: 18px; letter-spacing: -.035em; }
+  .dashboard-attention .link-button { font-size: 12px; }
+  .dashboard-empty { min-height: 233px; border-radius: 16px; }
+}
+
+@media (min-width: 1000px) and (max-width: 1180px) {
+  .dashboard-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-balance { grid-column: 1 / -1; }
+}
+
+@media (max-width: 767px) {
+  .dashboard-action-row .btn { flex: 1; min-width: 0; }
+  .dashboard-attention .section-row { margin-top: 22px; }
+}
+
 
 /* Public landing page */
 .landing-page { min-height: 100vh; color: #153b32; background: #fff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Noto Sans Devanagari', Arial, sans-serif; }
