@@ -623,3 +623,8 @@ textarea.control { min-height: 74px; resize: vertical; }
 .landing-step .landing-icon { transition: transform .3s ease, color .2s ease; }
 .landing-step:hover .landing-icon, .landing-step:focus-visible .landing-icon { color: #0f654d; transform: scale(1.18) rotate(-8deg); }
 @media (prefers-reduced-motion: reduce) { .landing-feature-card, .landing-feature-card::before, .landing-feature-card::after, .landing-feature-icon, .landing-step, .landing-step::before, .landing-step-number, .landing-step .landing-icon { transition: none; } }
+.landing-footer-contact { gap: 8px; }
+.landing-footer-contact a { width: 34px; height: 34px; justify-content: center; gap: 0; border: 1px solid #1b5b4930; border-radius: 10px; transition: color .18s ease, background .18s ease, border-color .18s ease, transform .18s ease; }
+.landing-footer-contact a:hover, .landing-footer-contact a:focus-visible { color: #08785a; background: #eaf5ec; border-color: #b9dcc4; transform: translateY(-2px); outline: none; }
+.landing-footer-contact svg { width: 18px; height: 18px; }
+.landing-footer-contact .x-icon { width: 19px; height: 19px; }
