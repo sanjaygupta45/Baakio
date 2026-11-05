@@ -628,3 +628,21 @@ textarea.control { min-height: 74px; resize: vertical; }
 .landing-footer-contact a:hover, .landing-footer-contact a:focus-visible { color: #08785a; background: #eaf5ec; border-color: #b9dcc4; transform: translateY(-2px); outline: none; }
 .landing-footer-contact svg { width: 18px; height: 18px; }
 .landing-footer-contact .x-icon { width: 19px; height: 19px; }
+.landing-faq { position: relative; overflow: hidden; background: radial-gradient(circle at 8% 16%, #edf8ef 0, transparent 30%), linear-gradient(180deg, #fff 0, #f7fbf7 100%); }
+.landing-faq-heading { align-self: start; padding: 28px; border: 1px solid #dceae0; border-radius: 22px; background: #fff; box-shadow: 0 12px 32px #183d2f0b; }
+.landing-faq-heading::before { content: '?'; display: grid; width: 42px; height: 42px; place-items: center; margin-bottom: 20px; border-radius: 14px; color: #fff; background: #2a8b67; font-size: 21px; font-weight: 850; box-shadow: 0 8px 18px #2a8b6730; }
+.landing-faq-heading h2 { max-width: 280px; }
+.landing-faq-list details { margin: 10px 0; padding: 0 20px; border: 1px solid #deebe1; border-radius: 17px; background: #fff; box-shadow: 0 7px 24px #183d2f0b; overflow: hidden; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.landing-faq-list details:first-child { border-top: 1px solid #deebe1; }
+.landing-faq-list details:hover, .landing-faq-list details:focus-within { transform: translateY(-2px); border-color: #b7d9c3; box-shadow: 0 14px 30px #183d2f14; }
+.landing-faq-list summary { padding: 21px 47px 21px 36px; color: #193f34; font-size: 15px; font-weight: 800; letter-spacing: -.01em; transition: color .2s ease; }
+.landing-faq-list summary::before { content: '?'; position: absolute; left: 0; top: 17px; display: grid; width: 24px; height: 24px; place-items: center; border-radius: 8px; color: #2a8b67; background: #eaf6ed; font-size: 12px; font-weight: 900; transition: background .2s ease, color .2s ease, transform .2s ease; }
+.landing-faq-list summary::after { top: 17px; right: 0; display: grid; width: 29px; height: 29px; place-items: center; border: 1px solid #d8e8dc; border-radius: 9px; color: #2a8b67; font-size: 19px; line-height: 1; transition: transform .2s ease, background .2s ease; }
+.landing-faq-list details[open] { border-color: #abd1b8; background: #fbfefb; }
+.landing-faq-list details[open] summary { color: #146549; }
+.landing-faq-list details[open] summary::before { color: #fff; background: #2a8b67; transform: rotate(8deg); }
+.landing-faq-list details[open] summary::after { background: #eaf6ed; transform: rotate(180deg); }
+.landing-faq-list details p { margin: 0; padding: 0 30px 22px 36px; animation: landingFaqReveal .25s ease both; }
+.landing-faq-list summary:focus-visible { outline: 3px solid #b8dfc4; outline-offset: 4px; border-radius: 7px; }
+@keyframes landingFaqReveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .landing-faq-list details, .landing-faq-list summary, .landing-faq-list summary::before, .landing-faq-list summary::after { transition: none; } .landing-faq-list details p { animation: none; } }
