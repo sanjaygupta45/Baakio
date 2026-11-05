@@ -1,0 +1,21 @@
+.aside h1{font-size:44px;line-height:1.05;letter-spacing:-1.8px;margin:18px 0 10px;color:var(--forest)}
+.aside p{font-size:16px;line-height:1.55;color:#436257}
+.aside .hint{font-size:13px;line-height:1.55;padding:15px 16px;border:1px solid #cbdacf;border-radius:15px;background:#f9fcf8;margin-top:22px}
+.demo-tour-info{margin-top:15px;padding:13px 15px;border-radius:15px;background:#e5f4ea;border:1px solid #cfe6d6;color:#285f4d;font-size:12px;line-height:1.45}
+.demo-tour-info strong{display:block;color:var(--forest);font-size:13px;margin-bottom:3px}
+.demo-back{display:inline-flex;margin-top:18px;color:var(--forest2);font-size:13px;font-weight:800;text-decoration:none}.demo-back:hover{text-decoration:underline;text-underline-offset:4px}
+.authlinks{display:none!important}
+.demo-tour{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#fafffb;border-bottom:1px solid var(--line);flex-shrink:0}
+.demo-tour-copy{min-width:0;flex:1}
+.demo-tour-step{font-size:10px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:#6a8277}
+.demo-tour-title{font-size:13px;font-weight:850;color:var(--forest);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.demo-tour-progress{height:4px;background:#e1ebe3;border-radius:99px;overflow:hidden;margin-top:6px}
+.demo-tour-progress span{display:block;height:100%;width:0;background:#2c8463;border-radius:99px;transition:width .2s linear}
+.demo-tour-actions{display:flex;gap:5px;flex:0 0 auto}
+.demo-tour-actions button{border:1px solid #cbdacf;background:#fff;color:var(--forest);border-radius:9px;min-width:31px;min-height:30px;padding:4px 7px;font-size:12px;font-weight:850}
+.demo-tour-actions button:hover{background:#eaf5ed}
+.demo-tour-actions .tour-next{background:var(--forest);border-color:var(--forest);color:#fff}
+.demo-tour-actions .tour-next:hover{background:var(--forest2)}
+.demo-tour.is-paused .demo-tour-progress span{background:#a96512}
+.demo-tour.is-paused .demo-tour-title{color:#8b581f}
+@media(max-width:780px){.aside h1{font-size:32px}.demo-tour{padding:9px 13px}.demo-tour-title{font-size:12px}.demo-tour-actions button{min-width:30px;padding-inline:6px}}

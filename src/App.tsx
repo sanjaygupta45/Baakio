@@ -451,11 +451,12 @@ function LoginScreen({ locale, t, notify, initialPurpose, onSignIn, onLocale, on
               <button className={`btn ${purpose === 'REGISTER' ? '' : 'secondary'}`} type="button" role="tab" aria-selected={purpose === 'REGISTER'} onClick={() => { setPurpose('REGISTER'); setErrorMessage('') }}>{t('createAccount')}</button>
             </div>
             <p className="subtle">{purpose === 'LOGIN' ? t('signInHint') : t('registerHint')}</p>
+            {purpose === 'REGISTER' && <p className="subtle auth-legal">{t('acceptLegal')} <a href="/privacy.html">{t('privacyShort')}</a> · <a href="/terms.html">{t('termsShort')}</a>.</p>}
             {purpose === 'REGISTER' && <>
               <div className="field"><label htmlFor="auth-name">{t('fullName')}</label><input className="control" id="auth-name" autoComplete="name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} required maxLength={160} /></div>
               <div className="field"><label htmlFor="auth-business">{t('shopName')}</label><input className="control" id="auth-business" autoComplete="organization" value={businessName} onChange={(event) => setBusinessName(event.target.value)} required maxLength={160} /></div>
             </>}
-            {config?.googleClientId && <GoogleSignInButton clientId={config.googleClientId} locale={locale} onCredential={(token) => void googleCredential(token)} onError={() => setErrorMessage(t('errorGoogleAuth'))} />}
+            {config?.googleClientId && <GoogleSignInButton clientId={config.googleClientId} locale={locale} autoPrompt={purpose === 'LOGIN'} onCredential={(token) => void googleCredential(token)} onError={() => setErrorMessage(t('errorGoogleAuth'))} />}
             {config?.emailEnabled && <>
               {config.googleClientId && <p className="subtle">{t('orEmail')}</p>}
               <div className="field"><label htmlFor="auth-email">{t('email')}</label><input className="control" id="auth-email" autoComplete="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required maxLength={190} /></div>

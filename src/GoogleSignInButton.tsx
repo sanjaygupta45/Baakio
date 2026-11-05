@@ -3,8 +3,14 @@ import { useEffect, useRef } from 'react'
 interface GoogleApi {
   accounts: {
     id: {
-      initialize: (options: { client_id: string; callback: (response: { credential: string }) => void }) => void
+      initialize: (options: {
+        client_id: string
+        callback: (response: { credential: string }) => void
+        cancel_on_tap_outside?: boolean
+      }) => void
       renderButton: (element: HTMLElement, options: { theme: string; size: string; locale: string; text: string }) => void
+      prompt: () => void
+      cancel: () => void
     }
   }
 }
@@ -35,11 +41,12 @@ function loadGoogle(): Promise<GoogleApi> {
   return scriptPromise
 }
 
-export default function GoogleSignInButton({ clientId, locale, onCredential, onError }: {
+export default function GoogleSignInButton({ clientId, locale, onCredential, onError, autoPrompt = false }: {
   clientId: string
   locale: string
   onCredential: (credential: string) => void
   onError: () => void
+  autoPrompt?: boolean
 }) {
   const container = useRef<HTMLDivElement>(null)
   const credentialHandler = useRef(onCredential)
@@ -55,6 +62,7 @@ export default function GoogleSignInButton({ clientId, locale, onCredential, onE
         google.accounts.id.initialize({
           client_id: clientId,
           callback: (response) => currentHandler?.(response.credential),
+          cancel_on_tap_outside: true,
         })
         initializedClientId = clientId
       }
@@ -62,8 +70,15 @@ export default function GoogleSignInButton({ clientId, locale, onCredential, onE
       google.accounts.id.renderButton(container.current, {
         theme: 'outline', size: 'large', locale: locale === 'hi-IN' ? 'hi' : 'en', text: 'continue_with',
       })
+      if (autoPrompt) {
+        window.setTimeout(() => { if (active) google.accounts.id.prompt() }, 0)
+      }
     }).catch(() => { if (active) errorHandler.current() })
-    return () => { active = false; if (currentHandler === handleCredential) currentHandler = null }
-  }, [clientId, locale])
-  return <div ref={container} className="google-sign-in" />
+    return () => {
+      active = false
+      if (autoPrompt) window.google?.accounts.id.cancel()
+      if (currentHandler === handleCredential) currentHandler = null
+    }
+  }, [autoPrompt, clientId, locale])
+  return <div ref={container} className="google-sign-in" aria-label="Continue with Google" />
 }

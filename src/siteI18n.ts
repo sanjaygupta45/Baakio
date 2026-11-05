@@ -45,6 +45,9 @@ async function setLanguage(language: string): Promise<void> {
   document.querySelectorAll<HTMLElement>('[data-only-lang]').forEach((element) => {
     element.hidden = element.dataset.onlyLang !== language
   })
+  document.querySelectorAll<HTMLAnchorElement>('[data-en-href][data-hi-href]').forEach((link) => {
+    link.setAttribute('href', language === 'hi' ? link.dataset.hiHref || '' : link.dataset.enHref || '')
+  })
   try {
     localStorage.setItem(storageKey, language)
     localStorage.setItem('baakio-locale', locale)
