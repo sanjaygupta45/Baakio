@@ -14,6 +14,7 @@ const english = {
   howItWorks: 'How it works',
   pricing: 'Pricing',
   faq: 'FAQ',
+  whyBaakio: 'Why Baakio',
   policies: 'Policies',
   privacy: 'Privacy',
   terms: 'Terms',
@@ -37,6 +38,20 @@ const english = {
   valueReminder: 'WhatsApp reminders',
   featureTitle: 'A clear view of every account',
   featureIntro: 'Keep customer balances, payments, and promises in one place.',
+  problemTitle: 'The hard part is remembering everything after the sale.',
+  problemIntro: 'Small shops run on trust and credit. When notes are scattered, it becomes difficult to know what is due, who promised to pay, and what was already collected.',
+  problemLabel: 'Common problem',
+  solutionLabel: 'Baakio helps',
+  problemOneTitle: '“Who still has to pay?”',
+  problemOneBody: 'Purchases and payments get split across notebooks, messages, and memory.',
+  problemOneSolution: 'See one clear balance for every customer.',
+  problemTwoTitle: 'Promises disappear in busy days',
+  problemTwoBody: 'A promised date is easy to forget when the counter gets busy.',
+  problemTwoSolution: 'Keep due dates and follow-ups in one simple list.',
+  problemThreeTitle: 'Writing every bill takes time',
+  problemThreeBody: 'Handwritten bills must be retyped, and small mistakes become hard to spot.',
+  problemThreeSolution: 'Create a draft, review it, and save only what is correct.',
+  problemCta: 'See how Baakio helps',
   balanceTitle: 'Customer balances',
   balanceBody: 'See who owes what, with due dates and payment history.',
   promiseTitle: 'Payment promises',
@@ -79,6 +94,7 @@ const hindi = {
   howItWorks: 'कैसे काम करता है',
   pricing: 'कीमत',
   faq: 'सवाल-जवाब',
+  whyBaakio: 'Baakio क्यों',
   policies: 'नीतियाँ',
   privacy: 'गोपनीयता',
   terms: 'नियम',
@@ -102,6 +118,20 @@ const hindi = {
   valueReminder: 'WhatsApp रिमाइंडर',
   featureTitle: 'हर खाते का साफ हिसाब',
   featureIntro: 'ग्राहक का बकाया, भुगतान और वादे एक जगह रखें।',
+  problemTitle: 'मुश्किल बिक्री नहीं, बिक्री के बाद का हिसाब है।',
+  problemIntro: 'छोटी दुकानें भरोसे और उधार पर चलती हैं। जब नोट अलग-अलग जगह हों, तो पता करना मुश्किल होता है कि किससे लेना है, किसने कब देने को कहा और कितना मिल चुका है।',
+  problemLabel: 'आम समस्या',
+  solutionLabel: 'Baakio की मदद',
+  problemOneTitle: '“अभी किससे पैसे लेने हैं?”',
+  problemOneBody: 'खरीद और भुगतान कॉपी, मैसेज और याददाश्त में अलग-अलग रह जाते हैं।',
+  problemOneSolution: 'हर ग्राहक का साफ बाकी एक जगह देखें।',
+  problemTwoTitle: 'भुगतान का वादा भूल जाता है',
+  problemTwoBody: 'दुकान की भागदौड़ में ग्राहक की दी हुई तारीख याद नहीं रहती।',
+  problemTwoSolution: 'देय तारीख और फॉलो-अप एक आसान सूची में रखें।',
+  problemThreeTitle: 'हर बिल लिखने में समय लगता है',
+  problemThreeBody: 'हाथ से लिखे बिल दोबारा लिखने पड़ते हैं और छोटी गलती पकड़ना मुश्किल होता है।',
+  problemThreeSolution: 'ड्राफ्ट बनाएँ, जाँचें और सही जानकारी ही सेव करें।',
+  problemCta: 'Baakio कैसे मदद करता है',
   balanceTitle: 'ग्राहक का बकाया',
   balanceBody: 'किसका कितना बाकी है, देय तारीख और भुगतान का इतिहास देखें।',
   promiseTitle: 'भुगतान के वादे',
@@ -183,6 +213,7 @@ export default function LandingPage({ locale, onLocaleChange, onLogin, onRegiste
           {menuOpen ? '×' : '☰'}
         </button>
         <nav className={`landing-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
+          <a href="#why" onClick={closeMenu}>{copy.whyBaakio}</a>
           <a href="#features" onClick={closeMenu}>{copy.features}</a>
           <a href="#how-it-works" onClick={closeMenu}>{copy.howItWorks}</a>
           <a href="#pricing" onClick={closeMenu}>{copy.pricing}</a>
@@ -259,6 +290,27 @@ export default function LandingPage({ locale, onLocaleChange, onLogin, onRegiste
     <section className="landing-value-strip" aria-label="Baakio benefits">
       <div className="landing-shell landing-value-grid">
         {values.map((value) => <div className="landing-value" key={value.label}><span className="landing-value-icon"><Icon name={value.icon} /></span><span>{value.label}</span></div>)}
+      </div>
+    </section>
+
+    <section className="landing-problem" id="why">
+      <div className="landing-shell landing-problem-grid">
+        <div className="landing-problem-intro">
+          <span className="landing-section-kicker">{copy.whyBaakio}</span>
+          <h2>{copy.problemTitle}</h2>
+          <p>{copy.problemIntro}</p>
+          <a className="landing-button landing-button-outline" href="#features">{copy.problemCta}<span aria-hidden="true">↓</span></a>
+        </div>
+        <div className="landing-problem-list">
+          {[
+            { icon: 'receipt' as const, title: copy.problemOneTitle, body: copy.problemOneBody, solution: copy.problemOneSolution },
+            { icon: 'calendar' as const, title: copy.problemTwoTitle, body: copy.problemTwoBody, solution: copy.problemTwoSolution },
+            { icon: 'message' as const, title: copy.problemThreeTitle, body: copy.problemThreeBody, solution: copy.problemThreeSolution },
+          ].map((problem) => <article className="landing-problem-card" key={problem.title}>
+            <span className="landing-problem-icon"><Icon name={problem.icon} /></span>
+            <div><span className="landing-problem-label">{copy.problemLabel}</span><h3>{problem.title}</h3><p>{problem.body}</p><div className="landing-problem-solution"><Icon name="check" /><span><b>{copy.solutionLabel}:</b> {problem.solution}</span></div></div>
+          </article>)}
+        </div>
       </div>
     </section>
 

@@ -659,3 +659,20 @@ textarea.control { min-height: 74px; resize: vertical; }
 @media (max-width: 760px) { .landing-footer { padding: 38px 0 22px; } .landing-footer > div { grid-template-columns: 1fr; grid-template-areas: 'brand' 'note' 'contact' 'nav' 'bottom'; gap: 0; } .landing-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; padding-top: 18px; border-top: 0; } .landing-footer-links::before { grid-column: 1 / -1; } .landing-footer > div > span { margin-top: 22px; } }
 .landing-footer-demo { display: inline-flex; align-items: center; padding: 8px 11px; border-radius: 9px; color: #f2fbf4 !important; background: #2a8b67; font-weight: 800 !important; box-shadow: 0 7px 16px #183d2f18; }
 .landing-footer-demo:hover, .landing-footer-demo:focus-visible { color: #fff !important; background: #359b75; transform: translateY(-1px); text-decoration: none !important; outline: none; }
+.landing-problem { padding: 86px 0; background: linear-gradient(135deg, #f5fbf6 0, #fff 70%); }
+.landing-problem-grid { display: grid; grid-template-columns: .78fr 1.22fr; gap: 58px; align-items: center; }
+.landing-problem-intro h2 { max-width: 440px; margin: 17px 0 15px; color: #153d33; font-size: clamp(30px, 3.5vw, 45px); line-height: 1.1; letter-spacing: -.05em; }
+.landing-problem-intro p { max-width: 430px; margin: 0 0 25px; color: #62766b; font-size: 15px; line-height: 1.7; }
+.landing-problem-list { display: grid; gap: 12px; }
+.landing-problem-card { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start; padding: 19px 21px; border: 1px solid #dceae0; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px #183d2f0b; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.landing-problem-card:hover { transform: translateX(5px); border-color: #b7d9c3; box-shadow: 0 15px 30px #183d2f14; }
+.landing-problem-icon { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 16px; color: #1a7052; background: #e7f5eb; }
+.landing-problem-icon .landing-icon { width: 27px; height: 27px; }
+.landing-problem-label { color: #7b9185; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.landing-problem-card h3 { margin: 5px 0; color: #173f34; font-size: 17px; letter-spacing: -.02em; }
+.landing-problem-card p { margin: 0; color: #687c71; font-size: 13px; line-height: 1.55; }
+.landing-problem-solution { display: flex; align-items: flex-start; gap: 8px; margin-top: 13px; padding-top: 11px; border-top: 1px solid #e7eee8; color: #356653; font-size: 12px; line-height: 1.45; }
+.landing-problem-solution .landing-icon { width: 18px; height: 18px; flex: 0 0 18px; color: #fff; padding: 3px; border-radius: 50%; background: #2a8b67; }
+.landing-problem-solution b { font-weight: 850; }
+@media (max-width: 1000px) { .landing-problem-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
+@media (max-width: 760px) { .landing-problem { padding: 62px 0; } .landing-problem-grid { grid-template-columns: 1fr; gap: 30px; } .landing-problem-intro { text-align: center; } .landing-problem-intro h2, .landing-problem-intro p { margin-left: auto; margin-right: auto; } .landing-problem-card:hover { transform: translateY(-3px); } }
