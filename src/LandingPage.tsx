@@ -68,7 +68,7 @@ const english = {
   answerFour: 'Bill scanning is in development. You can enter bills manually now.',
   finalTitle: 'Keep your shop accounts clear.',
   finalBody: 'Simple to use. Made for your business.',
-  footer: 'Clear accounts. Better follow-ups.',
+  footer: 'Keep customer credit and payments clear.',
   menu: 'Open menu',
 }
 
@@ -133,7 +133,7 @@ const hindi = {
   answerFour: 'बिल स्कैन की सुविधा बन रही है। अभी बिल हाथ से दर्ज कर सकते हैं।',
   finalTitle: 'दुकान का हिसाब साफ रखें।',
   finalBody: 'आसान इस्तेमाल। आपके कारोबार के लिए।',
-  footer: 'साफ हिसाब। बेहतर फॉलो-अप।',
+  footer: 'ग्राहकों का उधार और भुगतान साफ रखें।',
   menu: 'मेन्यू खोलें',
 }
 
@@ -342,6 +342,6 @@ export default function LandingPage({ locale, onLocaleChange, onLogin, onRegiste
       </div>
     </section>
 
-    <footer className="landing-footer"><div className="landing-shell"><a className="landing-brand" href="#top"><img className="landing-wordmark" src="/brand/baakio-logo.png" alt="Baakio" /><small>{copy.tagline}</small></a><p>{copy.footer}</p><div className="landing-footer-contact" aria-label="Contact Baakio"><a href="https://wa.me/918738074517" target="_blank" rel="noreferrer" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.1A8 8 0 1 1 20 11.5Z"/><path d="M9.2 8.4c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.6 1.5c.1.2 0 .5-.2.7l-.5.5c.6 1.2 1.5 2.1 2.8 2.7l.5-.5c.2-.2.4-.3.7-.2l1.5.7c.3.1.4.3.4.5v.5c0 .3-.1.6-.4.7-.6.3-1.2.4-1.8.2-2.3-.7-4.9-3.4-5.7-5.7-.2-.6-.1-1.2.2-1.8Z"/></svg></a><a href="mailto:baakio.shop@gmail.com" aria-label="Email baakio.shop@gmail.com" title="baakio.shop@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></a><a href="https://x.com/Dev_Sanjay2004" target="_blank" rel="noreferrer" aria-label="X" title="X"><svg className="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4 19 20M19 4 5 20"/></svg></a></div><nav className="landing-footer-links" aria-label={copy.policies}><a href="/privacy.html">{copy.privacy}</a><a href="/terms.html">{copy.terms}</a></nav><span>© {new Date().getFullYear()} Baakio</span></div></footer>
+    <footer className="landing-footer"><div className="landing-shell"><a className="landing-brand" href="#top"><img className="landing-wordmark" src="/brand/baakio-logo.png" alt="Baakio" /><small>{copy.tagline}</small></a><p>{copy.footer}</p><div className="landing-footer-contact" aria-label="Contact Baakio"><a href="https://wa.me/918738074517" target="_blank" rel="noreferrer" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.1A8 8 0 1 1 20 11.5Z"/><path d="M9.2 8.4c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.6 1.5c.1.2 0 .5-.2.7l-.5.5c.6 1.2 1.5 2.1 2.8 2.7l.5-.5c.2-.2.4-.3.7-.2l1.5.7c.3.1.4.3.4.5v.5c0 .3-.1.6-.4.7-.6.3-1.2.4-1.8.2-2.3-.7-4.9-3.4-5.7-5.7-.2-.6-.1-1.2.2-1.8Z"/></svg></a><a href="mailto:baakio.shop@gmail.com" aria-label="Email baakio.shop@gmail.com" title="baakio.shop@gmail.com"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></a><a href="https://x.com/Dev_Sanjay2004" target="_blank" rel="noreferrer" aria-label="X" title="X"><svg className="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4 19 20M19 4 5 20"/></svg></a></div><nav className="landing-footer-links" aria-label={copy.policies}><a className="landing-footer-demo" href="/demo.html">{copy.demo}</a><a href="/privacy.html">{copy.privacy}</a><a href="/terms.html">{copy.terms}</a></nav><span>© {new Date().getFullYear()} Baakio</span></div></footer>
   </main>
 }
