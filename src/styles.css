@@ -137,6 +137,12 @@ textarea.control { min-height: 74px; resize: vertical; }
 .scan-symbol { margin-bottom: 8px; font-size: 30px; }
 .toast { position: absolute; z-index: 6; bottom: 88px; left: 16px; right: 16px; padding: 13px; border-radius: 12px; background: #243f34; color: white; font-size: 12px; box-shadow: 0 10px 30px #0002; }
 .toast.error { background: #803831; }
+.sign-out-dialog { width: min(420px, calc(100% - 32px)); padding: 26px; border: 1px solid #dbe6dd; border-radius: 20px; color: var(--ink); background: #fff; box-shadow: 0 24px 80px #102b2250; }
+.sign-out-dialog::backdrop { background: #102b2273; backdrop-filter: blur(3px); }
+.sign-out-dialog-icon { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; color: var(--red); background: var(--redbg); font-size: 23px; font-weight: 800; }
+.sign-out-dialog h2 { margin: 18px 0 8px; color: var(--ink); font-size: 21px; letter-spacing: -.03em; }
+.sign-out-dialog p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.sign-out-dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 24px; }
 .center { text-align: center; }
 .spacer { height: 10px; }
 .loading-screen { min-height: 100dvh; display: grid; place-items: center; color: var(--muted); background: var(--bg); }
@@ -159,6 +165,8 @@ textarea.control { min-height: 74px; resize: vertical; }
   .screen { padding-left: 13px; padding-right: 13px; }
   .big-money { font-size: 31px; }
   .metric-card { padding: 13px; }
+  .sign-out-dialog { padding: 21px; }
+  .sign-out-dialog-actions { grid-template-columns: 1fr; }
 }
 
 /* Responsive account entry */

@@ -30,6 +30,13 @@ type AccountTab = 'activity' | 'promises' | 'statement'
 type AuthPurpose = 'LOGIN' | 'REGISTER'
 interface AuthConfig { googleClientId: string; emailEnabled: boolean; legacyPhoneEnabled: boolean }
 
+const APP_HISTORY_ROOT = 'baakioAppRoot'
+const APP_HISTORY_GUARD = 'baakioAppGuard'
+
+const hasHistoryMarker = (marker: string) => Boolean(
+  (window.history.state as Record<string, unknown> | null)?.[marker],
+)
+
 const todayInIndia = () => {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -138,6 +145,8 @@ export default function App() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [toast, setToast] = useState<{ message: string; error: boolean } | null>(null)
   const [showLogin, setShowLogin] = useState(false)
+  const [showSignOutConfirmation, setShowSignOutConfirmation] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const [authPurpose, setAuthPurpose] = useState<AuthPurpose>(() =>
     new URLSearchParams(window.location.search).get('mode') === 'register' ? 'REGISTER' : 'LOGIN',
   )
@@ -198,6 +207,53 @@ export default function App() {
     }
   }
 
+  const signOutAndLeave = useCallback(async () => {
+    try {
+      await api.post('/api/v1/auth/logout', {})
+      setAccountHolder(null)
+      window.location.replace('/')
+      return true
+    } catch (error) {
+      notify(t(errorKey(error)), true)
+      return false
+    }
+  }, [notify, t])
+
+  useEffect(() => {
+    if (!accountHolder || booting || !isAppEntry) return
+
+    if (!hasHistoryMarker(APP_HISTORY_GUARD)) {
+      window.history.replaceState({ ...window.history.state, [APP_HISTORY_ROOT]: true }, '')
+      window.history.pushState({ [APP_HISTORY_GUARD]: true }, '')
+    }
+
+    const handleBackNavigation = (event: PopStateEvent) => {
+      const state = event.state as Record<string, unknown> | null
+      if (!state?.[APP_HISTORY_ROOT]) return
+
+      // Restore the protected app entry while the user decides whether to sign out.
+      // This also prevents a second Back press from bypassing the confirmation.
+      window.history.pushState({ [APP_HISTORY_GUARD]: true }, '')
+      setShowSignOutConfirmation(true)
+    }
+
+    window.addEventListener('popstate', handleBackNavigation)
+    return () => window.removeEventListener('popstate', handleBackNavigation)
+  }, [accountHolder, booting, isAppEntry])
+
+  const stayInApp = useCallback(() => {
+    if (!hasHistoryMarker(APP_HISTORY_GUARD)) {
+      window.history.pushState({ [APP_HISTORY_GUARD]: true }, '')
+    }
+    setShowSignOutConfirmation(false)
+  }, [])
+
+  const confirmSignOutAndLeave = async () => {
+    setSigningOut(true)
+    const signedOut = await signOutAndLeave()
+    if (!signedOut) setSigningOut(false)
+  }
+
   const signIn = async (signedInAccountHolder: AccountHolder) => {
     const selectedLocale = localeChosenBeforeLogin ? locale : signedInAccountHolder.preferredLocale || locale
     await i18n.changeLanguage(selectedLocale)
@@ -234,7 +290,8 @@ export default function App() {
     ['home', 'home', 'home'], ['customers', 'customers', 'customers'], ['scan', 'scan', 'scan'], ['followUps', 'followUps', 'followUps'],
   ]
 
-  return <div className="desktop-layout app-layout">
+  return <>
+    <div className="desktop-layout app-layout">
     <aside className="desktop-aside app-sidebar" aria-label={t('descriptor')}>
       <div className="brand brand-on-dark"><img src="/brand/baakio-icon.png" alt="" /><span>baakio</span></div>
       <div className="app-sidebar-shop">{accountHolder.businessName}</div>
@@ -284,7 +341,7 @@ export default function App() {
         {page === 'opening' && selectedCustomer && <OpeningBalancePage {...sharedWithSelected} customer={selectedCustomer} />}
         {page === 'followUps' && <FollowUpsPage {...sharedWithSelected} />}
         {page === 'reminder' && selectedCustomer && <ReminderPage {...sharedWithSelected} customer={selectedCustomer} />}
-        {page === 'settings' && <SettingsPage {...sharedWithSelected} onLocaleChange={changeLocale} onSignedOut={() => { setAccountHolder(null); setPage('home'); setShowLogin(false); setAuthPurpose('LOGIN') }} />}
+        {page === 'settings' && <SettingsPage {...sharedWithSelected} onLocaleChange={changeLocale} onSignOut={signOutAndLeave} />}
         {page === 'scan' && <ScanPage {...sharedWithSelected} onNavigate={setPage} />}
       </main>
 
@@ -296,7 +353,50 @@ export default function App() {
       </nav>
       {toast && <div className={`toast ${toast.error ? 'error' : ''}`} role={toast.error ? 'alert' : 'status'}>{toast.message}</div>}
     </div>
-  </div>
+    </div>
+    {showSignOutConfirmation && <SignOutConfirmation
+      t={t}
+      busy={signingOut}
+      onStay={stayInApp}
+      onSignOut={() => void confirmSignOutAndLeave()}
+    />}
+  </>
+}
+
+function SignOutConfirmation({ t, busy, onStay, onSignOut }: {
+  t: (key: TranslationKey) => string
+  busy: boolean
+  onStay: () => void
+  onSignOut: () => void
+}) {
+  const dialog = useRef<HTMLDialogElement>(null)
+
+  useEffect(() => {
+    const currentDialog = dialog.current
+    if (currentDialog && !currentDialog.open) currentDialog.showModal()
+    return () => {
+      if (currentDialog?.open) currentDialog.close()
+    }
+  }, [])
+
+  return <dialog
+    ref={dialog}
+    className="sign-out-dialog"
+    aria-labelledby="sign-out-title"
+    aria-describedby="sign-out-description"
+    onCancel={(event) => {
+      event.preventDefault()
+      if (!busy) onStay()
+    }}
+  >
+    <div className="sign-out-dialog-icon" aria-hidden="true">↪</div>
+    <h2 id="sign-out-title">{t('signOutConfirmTitle')}</h2>
+    <p id="sign-out-description">{t('signOutConfirmDescription')}</p>
+    <div className="sign-out-dialog-actions">
+      <button className="btn secondary" type="button" disabled={busy} autoFocus onClick={onStay}>{t('staySignedIn')}</button>
+      <button className="btn danger" type="button" disabled={busy} onClick={onSignOut}>{busy ? t('signingOut') : t('signOutAndLeave')}</button>
+    </div>
+  </dialog>
 }
 
 function IndiaPhoneInput({ id, value, onChange, required = false }: {
@@ -966,7 +1066,7 @@ function ReminderPage({ locale, t, notify, customer }: SharedProps & { customer:
   </>
 }
 
-function SettingsPage({ locale, t, notify, accountHolder, onSignedOut, onLocaleChange }: SharedProps & { onSignedOut: () => void; onLocaleChange: (locale: Locale) => Promise<void> }) {
+function SettingsPage({ locale, t, notify, accountHolder, onSignOut, onLocaleChange }: SharedProps & { onSignOut: () => Promise<boolean>; onLocaleChange: (locale: Locale) => Promise<void> }) {
   const [business, setBusiness] = useState<Business | null>(null)
   const [kind, setKind] = useState<'vpa' | 'mobile'>('vpa')
   const [upiVpa, setUpiVpa] = useState('')
@@ -974,6 +1074,7 @@ function SettingsPage({ locale, t, notify, accountHolder, onSignedOut, onLocaleC
   const [payeeName, setPayeeName] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   useEffect(() => {
     api.get<Business>('/api/v1/business').then((value) => {
       setBusiness(value); setUpiVpa(value.upiVpa || '')
@@ -998,7 +1099,9 @@ function SettingsPage({ locale, t, notify, accountHolder, onSignedOut, onLocaleC
     } catch (error) { notify(t(errorKey(error)), true) } finally { setBusy(false) }
   }
   const signOut = async () => {
-    try { await api.post('/api/v1/auth/logout', {}); onSignedOut() } catch (error) { notify(t(errorKey(error)), true) }
+    setSigningOut(true)
+    const signedOut = await onSignOut()
+    if (!signedOut) setSigningOut(false)
   }
   return <>
     <section className="card"><div className="eyebrow">{t('appLanguage')}</div><p className="subtle">{accountHolder.businessName}</p><div className="btn-row"><button className={`btn ${locale === 'en-IN' ? '' : 'secondary'}`} type="button" onClick={() => void onLocaleChange('en-IN')}>{t('english')}</button><button className={`btn ${locale === 'hi-IN' ? '' : 'secondary'}`} type="button" onClick={() => void onLocaleChange('hi-IN')}>{t('hindi')}</button></div></section>
@@ -1012,7 +1115,7 @@ function SettingsPage({ locale, t, notify, accountHolder, onSignedOut, onLocaleC
       <button className="btn wide" type="submit" disabled={busy}>{busy ? t('saving') : t('saveSettings')}</button>
     </form>
     <LinkSignInMethods locale={locale} t={t} notify={notify} accountHolder={accountHolder} />
-    <section className="card"><div className="eyebrow">{accountHolder.email || accountHolder.phoneNumber}</div><button className="btn danger wide" type="button" style={{ marginTop: 12 }} onClick={() => void signOut()}>{t('signOut')}</button></section>
+    <section className="card"><div className="eyebrow">{accountHolder.email || accountHolder.phoneNumber}</div><button className="btn danger wide" type="button" style={{ marginTop: 12 }} disabled={signingOut} onClick={() => void signOut()}>{signingOut ? t('signingOut') : t('signOut')}</button></section>
   </>
 }
 
