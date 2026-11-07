@@ -651,7 +651,7 @@ textarea.control { min-height: 74px; resize: vertical; }
 .landing-footer > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, .7fr); grid-template-areas: 'brand nav' 'note nav' 'contact nav' 'bottom bottom'; gap: 0 58px; align-items: start; }
 .landing-footer .landing-brand { grid-area: brand; margin: 0; }
 .landing-footer > div > p { grid-area: note; max-width: 390px; margin: 17px 0 0; line-height: 1.6; }
-.landing-footer-contact { grid-area: contact; display: grid; grid-template-columns: repeat(2, 34px); gap: 8px; margin-top: 21px; padding-top: 17px; border-top: 1px solid #1b5b4918; }
+.landing-footer-contact { grid-area: contact; display: grid; grid-template-columns: repeat(3, 34px); gap: 8px; margin-top: 21px; padding-top: 17px; border-top: 1px solid #1b5b4918; }
 .landing-footer-contact::before { content: 'Connect with us'; grid-column: 1 / -1; color: #6b8879; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .landing-footer-links { grid-area: nav; display: grid; grid-template-columns: 1fr; justify-items: start; align-content: start; gap: 14px; padding: 22px 0 0; border-top: 1px solid #1b5b4918; }
 .landing-footer-links::before { content: 'Navigate'; color: #6b8879; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }

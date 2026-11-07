@@ -172,6 +172,15 @@
   .clarity-faq-grid{grid-template-columns:minmax(0,.7fr) minmax(480px,1.3fr);gap:40px}
 }
 @media(max-width:760px){
+  .site-header .nav{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 12px;min-height:0;padding-top:10px;padding-bottom:12px}
+  .site-header .brand{grid-column:1;grid-row:1;width:fit-content}
+  .site-header .brand-wordmark{width:145px}
+  .site-header .header-tools{display:contents}
+  .site-header .header-tools .menu-button{grid-column:2;grid-row:1;align-self:center;justify-self:end}
+  .site-header .header-tools .lang-switch{grid-column:1;grid-row:2;justify-self:start}
+  .site-header .header-tools>.auth-start{grid-column:2;grid-row:2;justify-self:end;min-width:132px;justify-content:center}
+  .site-header .nav-links{grid-column:1/-1;grid-row:3;order:initial;width:100%;padding-bottom:4px}
+  .clarity-hero,.clarity-story-section,.clarity-answers-section,.clarity-how-section,.clarity-faq-section{scroll-margin-top:154px}
   .clarity-hero-grid{grid-template-columns:1fr;gap:24px;min-height:0;padding-top:48px;padding-bottom:35px}
   .clarity-hero-copy{margin-inline:auto;text-align:center}
   .clarity-hero h1{max-width:560px;margin:16px auto 15px;font-size:clamp(39px,11.5vw,54px)}
@@ -201,7 +210,7 @@
   .clarity-bill-art,.clarity-payment-art,.clarity-chat-art{min-height:185px}
   .clarity-guardrail{grid-template-columns:1fr;gap:3px}
   .clarity-faq-grid .clarity-section-copy{text-align:center}
-  .clarity-closing-section{padding-top:24px}
+  .clarity-closing-section{padding:24px 0 32px}
   .clarity-closing-card{flex-direction:column;align-items:flex-start;padding:31px 25px;border-radius:23px}
   .clarity-closing-card .clarity-actions{justify-content:flex-start}
 }
