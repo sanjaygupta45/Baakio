@@ -1,9 +1,4 @@
 .aside h1{font-size:44px;line-height:1.05;letter-spacing:-1.8px;margin:18px 0 10px;color:var(--forest)}
-html[lang="hi"] body{font-family:"Noto Sans Devanagari","Kohinoor Devanagari","Devanagari Sangam MN",ui-sans-serif,system-ui,sans-serif;line-height:1.65}
-html[lang="hi"] :is(h1,h2,h3,.aside h1,.topheadline,.sectionrow h2,.empty h3){letter-spacing:0;line-height:1.35}
-html[lang="hi"] :is(p,.aside p,.subtle,.note,.person .meta,.itemdesc,.empty p,.statement){line-height:1.7}
-html[lang="hi"] :is(.eyebrow,.demo-tour-step){letter-spacing:.02em;line-height:1.5}
-html[lang="hi"] :is(button,.btn,.iconbtn,.nav,.chip,label,.demo-tour-title){line-height:1.45}
 .aside p{font-size:16px;line-height:1.55;color:#436257}
 .aside .hint{font-size:13px;line-height:1.55;padding:15px 16px;border:1px solid #cbdacf;border-radius:15px;background:#f9fcf8;margin-top:22px}
 .demo-tour-info{margin-top:15px;padding:13px 15px;border-radius:15px;background:#e5f4ea;border:1px solid #cfe6d6;color:#285f4d;font-size:12px;line-height:1.45}
