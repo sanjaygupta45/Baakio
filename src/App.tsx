@@ -1191,7 +1191,7 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
       {!customers.length ? <EmptyState icon="♙" title={t('noCustomers')} detail={t('noCustomersHint')} action={<button className="btn" type="button" onClick={() => onNavigate('newCustomer')}>{t('addCustomer')}</button>} /> :
         <form className="card" onSubmit={(event) => void upload(event)}>
           <div className="field"><label htmlFor="scan-customer">{t('scanSelectCustomer')}</label><select id="scan-customer" className="control" value={customerId} onChange={(event) => setCustomerId(event.target.value)} required>
-            {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.displayName}{customer.phoneE164 ? ` · ${customer.phoneE164.slice(-4)}` : ''} · #{customer.id}</option>)}
+            {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.displayName}</option>)}
           </select></div>
           <div className="field"><label htmlFor="scan-file">{t('scanPhotoLabel')}</label><input id="scan-file" className="control scan-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => { setFile(event.target.files?.[0] || null); uploadKey.current = newIdempotencyKey() }} required /></div>
           {file && <div className="note">{file.name} · {(file.size / (1024 * 1024)).toFixed(1)} MB</div>}
