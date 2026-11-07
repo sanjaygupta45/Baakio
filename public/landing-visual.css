@@ -163,6 +163,21 @@
 .clarity-closing-card .btn{color:#153f34;background:#fff;border-color:#fff}
 .clarity-closing-card .clarity-actions>a:last-child{display:inline-flex;align-items:center;min-height:50px;padding:12px 15px;color:#e4f4e9;font-size:13px;font-weight:800}
 
+/* Devanagari needs a more open vertical rhythm than the compact Latin display type. */
+html[lang="hi-IN"] body{font-family:"Noto Sans Devanagari","Kohinoor Devanagari","Devanagari Sangam MN",ui-sans-serif,system-ui,sans-serif}
+html[lang="hi-IN"] .clarity-hero h1{max-width:660px;font-size:clamp(44px,4.8vw,60px);line-height:1.22;letter-spacing:-.022em;text-wrap:balance}
+html[lang="hi-IN"] .clarity-section-copy h2,
+html[lang="hi-IN"] .clarity-section-heading h2,
+html[lang="hi-IN"] .clarity-closing-card h2{font-size:clamp(32px,3.8vw,48px);line-height:1.22;letter-spacing:-.02em;text-wrap:balance}
+html[lang="hi-IN"] .clarity-answer-copy h3,
+html[lang="hi-IN"] .clarity-flow-card h3{line-height:1.35;letter-spacing:0}
+html[lang="hi-IN"] .clarity-kicker{letter-spacing:.025em;line-height:1.45}
+html[lang="hi-IN"] .clarity-hero-copy>p,
+html[lang="hi-IN"] .clarity-section-copy>p,
+html[lang="hi-IN"] .clarity-section-heading>p{line-height:1.82}
+html[lang="hi-IN"] .nav-links{gap:21px}
+html[lang="hi-IN"] .nav-links>a{font-size:12px;white-space:nowrap}
+
 @media(max-width:1000px){
   .clarity-hero-grid{grid-template-columns:minmax(0,.85fr) minmax(420px,1.15fr);gap:20px}
   .clarity-payment-pop{left:0}
@@ -215,6 +230,12 @@
   .clarity-closing-section{padding:24px 0 32px}
   .clarity-closing-card{flex-direction:column;align-items:flex-start;padding:31px 25px;border-radius:23px}
   .clarity-closing-card .clarity-actions{justify-content:flex-start}
+  html[lang="hi-IN"] .clarity-hero h1{font-size:clamp(35px,9.5vw,44px);line-height:1.25;letter-spacing:-.015em}
+  html[lang="hi-IN"] .clarity-section-copy h2,
+  html[lang="hi-IN"] .clarity-section-heading h2,
+  html[lang="hi-IN"] .clarity-closing-card h2{font-size:clamp(30px,8.5vw,40px);line-height:1.26}
+  html[lang="hi-IN"] .nav-links{gap:0}
+  html[lang="hi-IN"] .nav-links>a{font-size:14px;white-space:normal}
 }
 @keyframes clarityKhataFocus{0%,100%{background-position:100% 50%;transform:translateY(0);box-shadow:0 10px 24px #16493835}50%{background-position:0 50%;transform:translateY(-2px);box-shadow:0 14px 30px #16493852}}
 @media(max-width:400px){

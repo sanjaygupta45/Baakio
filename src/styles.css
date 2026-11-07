@@ -21,6 +21,11 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: #e9efe8; }
+html[lang="hi"] body { font-family: "Noto Sans Devanagari", "Kohinoor Devanagari", "Devanagari Sangam MN", ui-sans-serif, system-ui, sans-serif; line-height: 1.65; }
+html[lang="hi"] :is(h1, h2, h3, h4, .desktop-aside h1, .page-heading h1, .section-row h2, .auth-aside h2, .dashboard-empty h3) { letter-spacing: 0; line-height: 1.35; }
+html[lang="hi"] :is(p, li, .subtle, .note, .metric-label, .person-meta, .item-description, .statement-preview) { line-height: 1.7; }
+html[lang="hi"] :is(.eyebrow, .form-section) { letter-spacing: .02em; line-height: 1.5; }
+html[lang="hi"] :is(button, .btn, .icon-btn, .nav-item, .app-sidebar-link, .link-button, .choice, label, small) { line-height: 1.45; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .56; }
