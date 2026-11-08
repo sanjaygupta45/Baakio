@@ -30,7 +30,6 @@ type AccountTab = 'activity' | 'promises' | 'statement'
 type AuthPurpose = 'LOGIN' | 'REGISTER'
 interface AuthConfig { googleClientId: string; emailEnabled: boolean; legacyPhoneEnabled: boolean }
 
-const APP_HISTORY_ROOT = 'baakioAppRoot'
 const APP_HISTORY_GUARD = 'baakioAppGuard'
 
 const hasHistoryMarker = (marker: string) => Boolean(
@@ -220,26 +219,23 @@ export default function App() {
   }, [notify, t])
 
   useEffect(() => {
-    if (!accountHolder || booting || !isAppEntry) return
+    if (!accountHolder || booting) return
 
     if (!hasHistoryMarker(APP_HISTORY_GUARD)) {
-      window.history.replaceState({ ...window.history.state, [APP_HISTORY_ROOT]: true }, '')
-      window.history.pushState({ [APP_HISTORY_GUARD]: true }, '')
+      window.history.pushState({ ...window.history.state, [APP_HISTORY_GUARD]: true }, '')
     }
 
-    const handleBackNavigation = (event: PopStateEvent) => {
-      const state = event.state as Record<string, unknown> | null
-      if (!state?.[APP_HISTORY_ROOT]) return
-
+    const handleBackNavigation = () => {
       // Restore the protected app entry while the user decides whether to sign out.
-      // This also prevents a second Back press from bypassing the confirmation.
+      // Do not depend on the previous entry's state: desktop browsers and hosting
+      // rewrites can restore that entry without the marker used by this app.
       window.history.pushState({ [APP_HISTORY_GUARD]: true }, '')
       setShowSignOutConfirmation(true)
     }
 
     window.addEventListener('popstate', handleBackNavigation)
     return () => window.removeEventListener('popstate', handleBackNavigation)
-  }, [accountHolder, booting, isAppEntry])
+  }, [accountHolder, booting])
 
   const stayInApp = useCallback(() => {
     if (!hasHistoryMarker(APP_HISTORY_GUARD)) {
