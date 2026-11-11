@@ -1233,12 +1233,16 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
     if (scanId === null) return
     let active = true
     let timer: number | undefined
+    let pollDelay = 1000
     const poll = async () => {
       try {
         const current = await api.get<ScanStatus>(`/api/v1/scans/${scanId}`)
         if (!active) return
         setScan(current)
-        if (current.status === 'QUEUED' || current.status === 'PROCESSING') timer = window.setTimeout(() => void poll(), 1400)
+        if (current.status === 'QUEUED' || current.status === 'PROCESSING') {
+          timer = window.setTimeout(() => void poll(), pollDelay)
+          pollDelay = Math.min(pollDelay * 1.6, 5000)
+        }
       } catch (error) {
         if (active) notify(t(errorKey(error)), true)
       }
@@ -1333,7 +1337,18 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
     </>}
 
     {scanId !== null && <>
-      <div className="scan-state card" role="status"><span className="scan-state-symbol" aria-hidden="true">{extracting ? '◌' : scan?.status === 'REVIEW_REQUIRED' ? '✓' : '!'}</span><div><strong>{scan?.status === 'REVIEW_REQUIRED' ? t('scanReviewRequired') : extracting ? t(!scan || scan.status === 'QUEUED' ? 'scanQueued' : 'scanProcessing') : scan?.status === 'POSTED' ? t('savedPurchase') : t('scanFailed')}</strong><div className="subtle">{selected?.displayName || ''}</div></div></div>
+      <div className={`scan-state card${extracting ? ' is-processing' : ''}`} role="status">
+        {extracting ? <div className="scan-processing-illustration" aria-hidden="true">
+          <div className="scan-processing-paper" />
+          <span className="scan-processing-sweep" />
+          <span className="scan-processing-spinner" />
+        </div> : <span className="scan-state-symbol" aria-hidden="true">{scan?.status === 'REVIEW_REQUIRED' ? '✓' : '!'}</span>}
+        <div className="scan-state-copy">
+          <strong>{scan?.status === 'REVIEW_REQUIRED' ? t('scanReviewRequired') : extracting ? t(!scan || scan.status === 'QUEUED' ? 'scanQueued' : 'scanProcessing') : scan?.status === 'POSTED' ? t('savedPurchase') : t('scanFailed')}</strong>
+          <div className="subtle">{selected?.displayName || ''}</div>
+          {extracting && <p className="subtle">{t('scanProgressHint')}</p>}
+        </div>
+      </div>
       {scan?.status === 'FAILED' && <section className="card"><p>{t('scanFailed')}</p><button className="btn wide" type="button" onClick={() => { if (selected) { openCustomer(selected); onNavigate('purchase') } }}>{t('scanManualFallback')}</button></section>}
       {scan?.status === 'REVIEW_REQUIRED' && scan.draft && <form onSubmit={(event) => void confirm(event)}>
         <div className="scan-review-grid">
