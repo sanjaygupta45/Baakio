@@ -292,6 +292,12 @@ export default function App() {
     account: 'customerAccount', newCustomer: 'createCustomer', purchase: 'addPurchase', payment: 'recordPayment',
     promise: 'addPromise', reschedule: 'reschedule', opening: 'setOpeningBalance', reminder: 'reminderTitle',
   }
+  const pageDescription: Record<Page, TranslationKey> = {
+    home: 'homeSubhead', customers: 'customersSubhead', scan: 'scanHint', followUps: 'followUpsSubhead',
+    settings: 'settingsSubhead', account: 'customerAccount', newCustomer: 'newCustomerSubhead',
+    purchase: 'purchaseSubhead', payment: 'paymentSubhead', promise: 'promiseSubhead',
+    reschedule: 'rescheduleHint', opening: 'openingBalanceHint', reminder: 'shareTrust',
+  }
   const navPage = page === 'account' || page === 'newCustomer' || page === 'purchase' || page === 'payment' || page === 'promise' || page === 'opening' || page === 'reschedule' || page === 'reminder' ? 'customers' : page
   const sharedWithSelected = { ...shared, selectedCustomer }
 
@@ -333,7 +339,7 @@ export default function App() {
             {page !== 'home' && page !== 'customers' && page !== 'followUps' && page !== 'scan' && page !== 'settings' &&
               <button className="back-btn" type="button" onClick={() => setPage(page === 'account' || page === 'newCustomer' ? 'customers' : 'account')}>{t('back')}</button>}
             <h1>{page === 'home' ? t('goodMorning') : page === 'account' && selectedCustomer ? selectedCustomer.displayName : t(pageTitle[page])}</h1>
-            {(page === 'home' || page === 'account') && <p>{page === 'home' ? t('homeSubhead') : t('customerAccount')}</p>}
+            <p>{t(pageDescription[page])}</p>
           </div>
         </div>
       </header>
@@ -356,7 +362,7 @@ export default function App() {
 
       <nav className="bottom-nav" aria-label={t('descriptor')}>
         {navigationItems.map(([target, icon, label]) => <button key={target}
-          className={`nav-item ${navPage === target ? 'active' : ''}`} type="button" onClick={() => setPage(target)}>
+          className={`nav-item ${navPage === target ? 'active' : ''}`} type="button" aria-current={navPage === target ? 'page' : undefined} onClick={() => setPage(target)}>
           <span className="nav-icon" aria-hidden="true"><AppIcon name={icon} size={19} /></span><span>{t(label)}</span>
         </button>)}
       </nav>
@@ -607,11 +613,18 @@ function LoginScreen({ locale, t, notify, initialPurpose, onSignIn, onLocale, on
 function HomePage({ locale, t, notify, openCustomer, onNavigate }: SharedProps & { onNavigate: (page: Page) => void }) {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null)
   const [busy, setBusy] = useState(true)
-  useEffect(() => {
-    api.get<Dashboard>('/api/v1/dashboard').then(setDashboard).catch((error) => notify(t(errorKey(error)), true)).finally(() => setBusy(false))
+  const [loadFailed, setLoadFailed] = useState(false)
+  const loadDashboard = useCallback(async () => {
+    setBusy(true)
+    setLoadFailed(false)
+    try { setDashboard(await api.get<Dashboard>('/api/v1/dashboard')) }
+    catch (error) { setLoadFailed(true); notify(t(errorKey(error)), true) }
+    finally { setBusy(false) }
   }, [notify, t])
+  useEffect(() => { void loadDashboard() }, [loadDashboard])
   const customersWithBalance = dashboard?.customersWithOutstanding || 0
   if (busy && !dashboard) return <Loading t={t} />
+  if (!dashboard && loadFailed) return <LoadError t={t} onRetry={() => void loadDashboard()} />
   return <div className="dashboard">
     <div className="dashboard-summary">
       <section className="card hero-card dashboard-balance">
@@ -655,22 +668,42 @@ function CustomersPage({ locale, t, notify, openCustomer, onNavigate }: SharedPr
   const [busy, setBusy] = useState(true)
   const [page, setPage] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [loadMoreFailed, setLoadMoreFailed] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   useEffect(() => {
+    let active = true
+    setBusy(true)
+    setLoadFailed(false)
     const timer = window.setTimeout(() => {
-      api.get<CustomerPage>(`/api/v1/customers${query({ search, page, size: 50 })}`)
-        .then((response) => setData((current) => page === 0 || !current ? response : { ...response, items: [...current.items, ...response.items] }))
-        .catch((error) => notify(t(errorKey(error)), true)).finally(() => { setBusy(false); setLoadingMore(false) })
+      api.get<CustomerPage>(`/api/v1/customers${query({ search, page: 0, size: 50 })}`)
+        .then((response) => { if (active) { setData(response); setPage(0) } })
+        .catch((error) => { if (active) { setLoadFailed(true); notify(t(errorKey(error)), true) } })
+        .finally(() => { if (active) setBusy(false) })
     }, 180)
-    return () => window.clearTimeout(timer)
-  }, [search, page, notify])
-  const loadMore = () => { setLoadingMore(true); setPage((current) => current + 1) }
-  const searchFor = (value: string) => { setSearch(value); setPage(0); setData(null); setBusy(true) }
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [search, reloadKey, notify, t])
+  const loadMore = async () => {
+    setLoadingMore(true)
+    setLoadMoreFailed(false)
+    try {
+      const nextPage = page + 1
+      const response = await api.get<CustomerPage>(`/api/v1/customers${query({ search, page: nextPage, size: 50 })}`)
+      setData((current) => current ? { ...response, items: [...current.items, ...response.items] } : response)
+      setPage(nextPage)
+    } catch (error) {
+      setLoadMoreFailed(true)
+      notify(t(errorKey(error)), true)
+    } finally { setLoadingMore(false) }
+  }
+  const searchFor = (value: string) => { setSearch(value); setPage(0); setData(null); setLoadMoreFailed(false); setBusy(true) }
   return <>
     <div className="field"><label className="sr-only" htmlFor="customer-search">{t('searchCustomers')}</label><input id="customer-search" className="search-input" value={search} onChange={(event) => searchFor(event.target.value)} placeholder={t('searchCustomers')} /></div>
     <div className="section-row"><h2>{t('customerCount')} · {data?.total ?? '…'}</h2><button className="btn mini" type="button" onClick={() => onNavigate('newCustomer')}>＋ {t('addCustomer')}</button></div>
-    {busy && !data ? <Loading t={t} /> : data?.items.length ? data.items.map((customer) => <CustomerRow key={customer.id} customer={customer} locale={locale} t={t} onClick={() => openCustomer(customer)} />) :
+    {busy && !data ? <Loading t={t} /> : loadFailed && !data ? <LoadError t={t} onRetry={() => { setBusy(true); setReloadKey((current) => current + 1) }} /> : data?.items.length ? data.items.map((customer) => <CustomerRow key={customer.id} customer={customer} locale={locale} t={t} onClick={() => openCustomer(customer)} />) :
       <EmptyState icon="⌕" title={search ? t('emptySearch') : t('noCustomers')} detail={search ? '' : t('noCustomersHint')} action={!search ? <button className="btn" type="button" onClick={() => onNavigate('newCustomer')}>{t('addCustomer')}</button> : null} />}
-    {data && data.items.length < data.total && <button className="btn secondary wide" type="button" disabled={loadingMore} onClick={loadMore}>{loadingMore ? t('loading') : t('loadMore')}</button>}
+    {loadMoreFailed && data && <LoadError t={t} onRetry={() => void loadMore()} />}
+    {data && data.items.length < data.total && !loadMoreFailed && <button className="btn secondary wide" type="button" disabled={loadingMore} onClick={() => void loadMore()}>{loadingMore ? t('loading') : t('loadMore')}</button>}
   </>
 }
 
@@ -691,13 +724,23 @@ function NewCustomerPage({ t, notify, onSaved, onCancel, openCustomer }: SharedP
   const [notes, setNotes] = useState('')
   const [messageLocale, setMessageLocale] = useState<Locale>('en-IN')
   const [matching, setMatching] = useState<Customer[]>([])
+  const [matchingFailed, setMatchingFailed] = useState(false)
   const [busy, setBusy] = useState(false)
   useEffect(() => {
-    if (name.trim().length < 2) { setMatching([]); return }
+    let active = true
+    if (name.trim().length < 2) { setMatching([]); setMatchingFailed(false); return }
     const timer = window.setTimeout(() => api.get<CustomerPage>(`/api/v1/customers${query({ search: name.trim(), page: 0, size: 10 })}`)
-      .then((response) => setMatching(response.items.filter((item) => item.displayName.trim().toLowerCase() === name.trim().toLowerCase()))).catch(() => setMatching([])), 250)
-    return () => window.clearTimeout(timer)
-  }, [name])
+      .then((response) => {
+        if (active) {
+          setMatching(response.items.filter((item) => item.displayName.trim().toLowerCase() === name.trim().toLowerCase()))
+          setMatchingFailed(false)
+        }
+      })
+      .catch((error) => {
+        if (active) { setMatchingFailed(true); notify(t(errorKey(error)), true) }
+      }), 250)
+    return () => { active = false; window.clearTimeout(timer) }
+  }, [name, notify, t])
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (!name.trim()) { notify(t('required'), true); return }
@@ -715,6 +758,7 @@ function NewCustomerPage({ t, notify, onSaved, onCancel, openCustomer }: SharedP
   }
   return <form className="card" onSubmit={(event) => void submit(event)}>
     {matching.length > 0 && <div className="note warn">{t('duplicateWarning')} {matching.map((item) => item.phoneE164).filter(Boolean).join(', ')}</div>}
+    {matchingFailed && <div className="note warn" role="status">{t('duplicateCheckUnavailable')}</div>}
     <div className="field"><label htmlFor="new-customer-name">{t('customerName')}</label><input id="new-customer-name" className="control" value={name} onChange={(event) => setName(event.target.value)} required maxLength={160} autoFocus /></div>
     <div className="field"><label htmlFor="new-customer-phone">{t('phone')}</label><IndiaPhoneInput id="new-customer-phone" value={phone} onChange={setPhone} /></div>
     <div className="field"><label htmlFor="new-customer-language">{t('preferredLanguage')}</label><select id="new-customer-language" className="control" value={messageLocale} onChange={(event) => setMessageLocale(event.target.value as Locale)}><option value="en-IN">English</option><option value="hi-IN">हिन्दी</option></select></div>
@@ -732,22 +776,33 @@ function AccountPage({ locale, t, notify, selectedCustomer, refreshKey, onNaviga
   const [purchases, setPurchases] = useState<PurchaseRecord[]>([])
   const [payments, setPayments] = useState<PaymentRecord[]>([])
   const [tab, setTab] = useState<AccountTab>('activity')
-  useEffect(() => {
-    if (!selectedCustomer) return
+  const [loadingAccount, setLoadingAccount] = useState(true)
+  const [accountFailed, setAccountFailed] = useState(false)
+  const loadAccount = useCallback(async () => {
+    if (!selectedCustomer) { setAccountFailed(true); setLoadingAccount(false); return }
+    setLoadingAccount(true)
+    setAccountFailed(false)
+    setCustomer(null)
+    setLedger(null)
     const customerUrl = `/api/v1/customers/${selectedCustomer.id}`
-    Promise.all([
-      api.get<Customer>(customerUrl),
-      api.get<Ledger>(`${customerUrl}/ledger${query({ from: '1900-01-01', to: todayInIndia() })}`),
-      api.get<Commitment[]>(`${customerUrl}/commitments`),
-      listAllPurchases(selectedCustomer.id),
-      api.get<PaymentRecord[]>(`${customerUrl}/payments`),
-    ]).then(([current, history, promises, purchaseHistory, paymentHistory]) => {
+    try {
+      const [current, history, promises, purchaseHistory, paymentHistory] = await Promise.all([
+        api.get<Customer>(customerUrl),
+        api.get<Ledger>(`${customerUrl}/ledger${query({ from: '1900-01-01', to: todayInIndia() })}`),
+        api.get<Commitment[]>(`${customerUrl}/commitments`),
+        listAllPurchases(selectedCustomer.id),
+        api.get<PaymentRecord[]>(`${customerUrl}/payments`),
+      ])
       setCustomer(current); setLedger(history); setCommitments(promises); setPurchases(purchaseHistory); setPayments(paymentHistory)
-    })
-      .catch((error) => notify(t(errorKey(error)), true))
-  }, [selectedCustomer?.id, refreshKey, notify, t])
+    } catch (error) {
+      setAccountFailed(true)
+      notify(t(errorKey(error)), true)
+    } finally { setLoadingAccount(false) }
+  }, [refreshKey, selectedCustomer?.id, notify, t])
+  useEffect(() => { void loadAccount() }, [loadAccount])
   if (!selectedCustomer) return <EmptyState icon="⌕" title={t('noCustomers')} detail={t('noCustomersHint')} />
-  if (!customer || !ledger) return <Loading t={t} />
+  if (loadingAccount) return <Loading t={t} />
+  if (accountFailed || !customer || !ledger) return <LoadError t={t} onRetry={() => void loadAccount()} />
   const nearest = commitments.find((item) => Number(item.remaining) > 0 && item.status !== 'FULFILLED')
   const hasBalance = minorUnits(customer.outstanding) > 0n
   return <>
@@ -834,9 +889,9 @@ function StatementPanel({ customer, initialLedger, locale, t, notify }: {
   }
   return <>
     <form className="card" onSubmit={(event) => void submit(event)}>
-      <div className="grid-two"><div className="field"><label htmlFor="statement-from">{t('periodFrom')}</label><input className="control" id="statement-from" type="date" value={from} onChange={(event) => setFrom(event.target.value)} required /></div>
-        <div className="field"><label htmlFor="statement-to">{t('periodTo')}</label><input className="control" id="statement-to" type="date" value={to} onChange={(event) => setTo(event.target.value)} required /></div></div>
-      <button className="btn secondary wide" type="submit" disabled={busy}>{busy ? t('loading') : t('showStatement')}</button>
+      <div className="grid-two"><div className="field"><label htmlFor="statement-from">{t('periodFrom')}</label><input className="control" id="statement-from" type="date" max={to} value={from} onChange={(event) => setFrom(event.target.value)} required /></div>
+        <div className="field"><label htmlFor="statement-to">{t('periodTo')}</label><input className="control" id="statement-to" type="date" min={from} value={to} onChange={(event) => setTo(event.target.value)} required /></div></div>
+      <button className="btn secondary wide" type="submit" disabled={busy || from > to}>{busy ? t('loading') : t('showStatement')}</button>
     </form>
     <section className="card">
       <Split label={t('openingForPeriod')} value={money(ledger.openingAtFrom, locale)} />
@@ -919,7 +974,16 @@ function PaymentPage({ locale, t, notify, onSaved, customer, commitmentId }: Sha
   const [allocationId, setAllocationId] = useState(commitmentId ? String(commitmentId) : '')
   const [allocationAmount, setAllocationAmount] = useState('')
   const [busy, setBusy] = useState(false)
-  useEffect(() => { api.get<Commitment[]>(`/api/v1/customers/${customer.id}/commitments`).then(setCommitments).catch(() => setCommitments([])) }, [customer.id])
+  const [loadingCommitments, setLoadingCommitments] = useState(true)
+  const [commitmentsFailed, setCommitmentsFailed] = useState(false)
+  const loadCommitments = useCallback(async () => {
+    setLoadingCommitments(true)
+    setCommitmentsFailed(false)
+    try { setCommitments(await api.get<Commitment[]>(`/api/v1/customers/${customer.id}/commitments`)) }
+    catch (error) { setCommitmentsFailed(true); notify(t(errorKey(error)), true) }
+    finally { setLoadingCommitments(false) }
+  }, [customer.id, notify, t])
+  useEffect(() => { void loadCommitments() }, [loadCommitments])
   useEffect(() => { setAllocationId(commitmentId ? String(commitmentId) : '') }, [commitmentId])
   const active = commitments.filter((item) => Number(item.remaining) > 0 && item.status !== 'FULFILLED')
   const submit = async (event: FormEvent) => {
@@ -934,6 +998,8 @@ function PaymentPage({ locale, t, notify, onSaved, customer, commitmentId }: Sha
       onSaved(t('savedPayment'))
     } catch (error) { notify(t(errorKey(error)), true) } finally { setBusy(false) }
   }
+  if (loadingCommitments) return <Loading t={t} />
+  if (commitmentsFailed) return <LoadError t={t} onRetry={() => void loadCommitments()} />
   return <form className="card" onSubmit={(event) => void submit(event)}>
     <div className="eyebrow">{customer.displayName} · {t('balance')}</div><div className="big-money" style={{ fontSize: 29 }}>{money(customer.outstanding, locale)}</div>
     <div className="field"><label htmlFor="payment-amount">{t('amount')}</label><input id="payment-amount" className="control" type="number" min="0.01" step="0.01" value={amount} onChange={(event) => { setAmount(event.target.value); if (!allocationAmount) setAllocationAmount(event.target.value) }} required /></div>
@@ -958,8 +1024,17 @@ function PromisePage({ locale, t, notify, onSaved, customer }: SharedProps & { c
   const [dueDate, setDueDate] = useState(todayInIndia())
   const [note, setNote] = useState('')
   const [commitments, setCommitments] = useState<Commitment[]>([])
+  const [loadingCommitments, setLoadingCommitments] = useState(true)
+  const [commitmentsFailed, setCommitmentsFailed] = useState(false)
   const [busy, setBusy] = useState(false)
-  useEffect(() => { api.get<Commitment[]>(`/api/v1/customers/${customer.id}/commitments`).then(setCommitments).catch(() => setCommitments([])) }, [customer.id])
+  const loadCommitments = useCallback(async () => {
+    setLoadingCommitments(true)
+    setCommitmentsFailed(false)
+    try { setCommitments(await api.get<Commitment[]>(`/api/v1/customers/${customer.id}/commitments`)) }
+    catch (error) { setCommitmentsFailed(true); notify(t(errorKey(error)), true) }
+    finally { setLoadingCommitments(false) }
+  }, [customer.id, notify, t])
+  useEffect(() => { void loadCommitments() }, [loadCommitments])
   const unpromisedAmount = commitments.filter((item) => item.status !== 'FULFILLED').reduce((sum, item) => sum - minorUnits(item.remaining), minorUnits(customer.outstanding))
   const unpromised = unpromisedAmount > 0n ? unpromisedAmount : 0n
   const submit = async (event: FormEvent) => {
@@ -971,6 +1046,8 @@ function PromisePage({ locale, t, notify, onSaved, customer }: SharedProps & { c
       onSaved(t('savedPromise'))
     } catch (error) { notify(t(errorKey(error)), true) } finally { setBusy(false) }
   }
+  if (loadingCommitments) return <Loading t={t} />
+  if (commitmentsFailed) return <LoadError t={t} onRetry={() => void loadCommitments()} />
   return <form className="card" onSubmit={(event) => void submit(event)}>
     <div className="eyebrow">{customer.displayName} · {t('balance')}</div><div className="big-money" style={{ fontSize: 29 }}>{money(customer.outstanding, locale)}</div>
     <div className="subtle">{t('withoutPromise')}: {moneyFromMinor(unpromised, locale)}</div>
@@ -983,16 +1060,25 @@ function PromisePage({ locale, t, notify, onSaved, customer }: SharedProps & { c
 
 function ReschedulePage({ locale, t, notify, onSaved, commitmentId, selectedCustomer }: SharedProps & { commitmentId: number }) {
   const [commitment, setCommitment] = useState<Commitment | null>(null)
+  const [loadingCommitment, setLoadingCommitment] = useState(true)
+  const [commitmentFailed, setCommitmentFailed] = useState(false)
   const [dueDate, setDueDate] = useState('')
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
-  useEffect(() => {
-    if (!selectedCustomer) return
-    api.get<Commitment[]>(`/api/v1/customers/${selectedCustomer.id}/commitments`).then((items) => {
+  const loadCommitment = useCallback(async () => {
+    if (!selectedCustomer) { setCommitmentFailed(true); setLoadingCommitment(false); return }
+    setLoadingCommitment(true)
+    setCommitmentFailed(false)
+    try {
+      const items = await api.get<Commitment[]>(`/api/v1/customers/${selectedCustomer.id}/commitments`)
       const found = items.find((item) => item.id === commitmentId)
-      if (found) { setCommitment(found); setDueDate(found.dueDate) }
-    }).catch(() => notify(t('errorGeneric'), true))
-  }, [commitmentId, notify, selectedCustomer?.id])
+      setCommitment(found || null)
+      if (found) setDueDate(found.dueDate)
+      else setCommitmentFailed(true)
+    } catch (error) { setCommitmentFailed(true); notify(t(errorKey(error)), true) }
+    finally { setLoadingCommitment(false) }
+  }, [commitmentId, notify, selectedCustomer?.id, t])
+  useEffect(() => { void loadCommitment() }, [loadCommitment])
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (!dueDate) { notify(t('required'), true); return }
@@ -1002,7 +1088,8 @@ function ReschedulePage({ locale, t, notify, onSaved, commitmentId, selectedCust
       onSaved(t('savedReschedule'))
     } catch (error) { notify(t(errorKey(error)), true) } finally { setBusy(false) }
   }
-  if (!commitment) return <Loading t={t} />
+  if (loadingCommitment) return <Loading t={t} />
+  if (commitmentFailed || !commitment) return <LoadError t={t} onRetry={() => void loadCommitment()} />
   return <form className="card" onSubmit={(event) => void submit(event)}>
     <div className="eyebrow">{t('remainingPromise')}</div><div className="big-money" style={{ fontSize: 29 }}>{money(commitment.remaining, locale)}</div>
     <div className="split-row"><span>{t('dueOn')}</span><strong>{dateText(commitment.dueDate, locale)}</strong></div>
@@ -1040,14 +1127,25 @@ function FollowUpsPage({ locale, t, notify, openCustomer }: SharedProps) {
   const [filter, setFilter] = useState<'all' | 'OVERDUE' | 'DUE_TODAY' | 'UPCOMING'>('all')
   const [customers, setCustomers] = useState<Customer[]>([])
   const [withoutPromise, setWithoutPromise] = useState<Customer[]>([])
-  useEffect(() => {
-    listAllCustomers().then((items) => {
+  const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const loadFollowUps = useCallback(async () => {
+    setLoading(true)
+    setLoadFailed(false)
+    try {
+      const items = await listAllCustomers()
       const due = items.filter((item) => Number(item.outstanding) > 0 && item.nextCommitment)
       setCustomers(due)
       setWithoutPromise(items.filter((item) => Number(item.outstanding) > 0 && !item.nextCommitment))
-    }).catch((error) => notify(t(errorKey(error)), true))
+    } catch (error) {
+      setLoadFailed(true)
+      notify(t(errorKey(error)), true)
+    } finally { setLoading(false) }
   }, [notify, t])
+  useEffect(() => { void loadFollowUps() }, [loadFollowUps])
   const filtered = useMemo(() => filter === 'all' ? customers : customers.filter((item) => item.nextCommitment?.status === filter), [customers, filter])
+  if (loading) return <Loading t={t} />
+  if (loadFailed) return <LoadError t={t} onRetry={() => void loadFollowUps()} />
   return <>
     <div className="choice-row">{(['all', 'OVERDUE', 'DUE_TODAY', 'UPCOMING'] as const).map((value) => <button className={`choice ${filter === value ? 'active' : ''}`} key={value} type="button" onClick={() => setFilter(value)}>{value === 'all' ? t('all') : t(labelsForStatus[value])}</button>)}</div>
     {filtered.length ? filtered.map((customer) => <CustomerRow key={customer.id} customer={customer} locale={locale} t={t} onClick={() => openCustomer(customer)} />) : <EmptyState icon="◷" title={t('noFollowUps')} />}
@@ -1079,8 +1177,8 @@ function ReminderPage({ locale, t, notify, customer }: SharedProps & { customer:
     <section className="card"><div className="eyebrow">{customer.displayName} · {t('recipient')}</div><div style={{ marginTop: 7, fontWeight: 700 }}>{customer.phoneE164 || t('noPhone')}</div>
       <div className="form-section">{t('messageLanguage')}</div><div className="choice-row">{(['en-IN', 'hi-IN'] as const).map((value) => <button className={`choice ${messageLocale === value ? 'active' : ''}`} type="button" key={value} onClick={() => setMessageLocale(value)}>{value === 'en-IN' ? 'English' : 'हिन्दी'}</button>)}</div>
       <div className="form-section">{t('preview')}</div><div className="choice-row">{(['SHORT', 'DETAILED'] as const).map((value) => <button className={`choice ${format === value ? 'active' : ''}`} type="button" key={value} onClick={() => setFormat(value)}>{t(value === 'SHORT' ? 'short' : 'detailed')}</button>)}</div>
-      <div className="grid-two"><div className="field"><label htmlFor="reminder-from">{t('periodFrom')}</label><input id="reminder-from" className="control" type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></div><div className="field"><label htmlFor="reminder-to">{t('periodTo')}</label><input id="reminder-to" className="control" type="date" value={to} onChange={(event) => setTo(event.target.value)} /></div></div>
-      <button className="btn wide" type="button" disabled={busy} onClick={() => void createPreview()}>{busy ? t('loading') : t('preview')}</button>
+      <div className="grid-two"><div className="field"><label htmlFor="reminder-from">{t('periodFrom')}</label><input id="reminder-from" className="control" type="date" max={to} value={from} onChange={(event) => setFrom(event.target.value)} /></div><div className="field"><label htmlFor="reminder-to">{t('periodTo')}</label><input id="reminder-to" className="control" type="date" min={from} value={to} onChange={(event) => setTo(event.target.value)} /></div></div>
+      <button className="btn wide" type="button" disabled={busy || from > to} onClick={() => void createPreview()}>{busy ? t('loading') : t('preview')}</button>
     </section>
     {preview && <>
       <span className="badge grey">{t('notSent')}</span>
@@ -1096,6 +1194,8 @@ function ReminderPage({ locale, t, notify, customer }: SharedProps & { customer:
 
 function SettingsPage({ locale, t, notify, accountHolder, onSignOut, onLocaleChange }: SharedProps & { onSignOut: () => Promise<boolean>; onLocaleChange: (locale: Locale) => Promise<void> }) {
   const [business, setBusiness] = useState<Business | null>(null)
+  const [loadingBusiness, setLoadingBusiness] = useState(true)
+  const [businessFailed, setBusinessFailed] = useState(false)
   const [kind, setKind] = useState<'vpa' | 'mobile'>('vpa')
   const [upiVpa, setUpiVpa] = useState('')
   const [mobile, setMobile] = useState('')
@@ -1103,18 +1203,26 @@ function SettingsPage({ locale, t, notify, accountHolder, onSignOut, onLocaleCha
   const [confirmed, setConfirmed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
-  useEffect(() => {
-    api.get<Business>('/api/v1/business').then((value) => {
+  const loadBusiness = useCallback(async () => {
+    setLoadingBusiness(true)
+    setBusinessFailed(false)
+    try {
+      const value = await api.get<Business>('/api/v1/business')
       setBusiness(value); setUpiVpa(value.upiVpa || '')
       const savedMobile = value.upiLinkedMobileE164 || ''
       const hasIndianMobile = /^\+91[6-9][0-9]{9}$/.test(savedMobile)
       setMobile(hasIndianMobile ? savedMobile.slice(3) : '')
       setPayeeName(value.upiPayeeName || '')
       setKind(hasIndianMobile ? 'mobile' : 'vpa'); setConfirmed(value.paymentDetailsAccountHolderConfirmed)
-    }).catch((error) => notify(t(errorKey(error)), true))
-  }, [notify])
+    } catch (error) {
+      setBusinessFailed(true)
+      notify(t(errorKey(error)), true)
+    } finally { setLoadingBusiness(false) }
+  }, [notify, t])
+  useEffect(() => { void loadBusiness() }, [loadBusiness])
   const save = async (event: FormEvent) => {
     event.preventDefault()
+    if (!business || loadingBusiness || businessFailed) return
     setBusy(true)
     try {
       const updated = await api.patch<Business>('/api/v1/business/payment-details', {
@@ -1135,12 +1243,14 @@ function SettingsPage({ locale, t, notify, accountHolder, onSignOut, onLocaleCha
     <section className="card"><div className="eyebrow">{t('appLanguage')}</div><p className="subtle">{accountHolder.businessName}</p><div className="btn-row"><button className={`btn ${locale === 'en-IN' ? '' : 'secondary'}`} type="button" onClick={() => void onLocaleChange('en-IN')}>{t('english')}</button><button className={`btn ${locale === 'hi-IN' ? '' : 'secondary'}`} type="button" onClick={() => void onLocaleChange('hi-IN')}>{t('hindi')}</button></div></section>
     <form className="card" onSubmit={(event) => void save(event)}>
       <div className="eyebrow">{t('paymentDetails')}</div><p className="subtle">{t('paymentDetailsHint')}</p>
+      {loadingBusiness ? <Loading t={t} /> : businessFailed ? <LoadError t={t} onRetry={() => void loadBusiness()} /> : <>
       <div className="choice-row"><button className={`choice ${kind === 'vpa' ? 'active' : ''}`} type="button" onClick={() => setKind('vpa')}>{t('upiId')}</button><button className={`choice ${kind === 'mobile' ? 'active' : ''}`} type="button" onClick={() => setKind('mobile')}>{t('upiMobile')}</button></div>
       {kind === 'vpa' ? <div className="field"><label htmlFor="shop-upi">{t('upiId')}</label><input id="shop-upi" className="control" value={upiVpa} onChange={(event) => { setUpiVpa(event.target.value); setConfirmed(false) }} maxLength={120} /></div> : <div className="field"><label htmlFor="shop-mobile">{t('upiMobile')}</label><IndiaPhoneInput id="shop-mobile" value={mobile} onChange={(value) => { setMobile(value); setConfirmed(false) }} /></div>}
       <div className="field"><label htmlFor="payee-name">{t('payeeName')}</label><input id="payee-name" className="control" value={payeeName} onChange={(event) => setPayeeName(event.target.value)} maxLength={160} /></div>
       {(upiVpa || mobile) && <Check label={t('accountHolderConfirmPayment')} checked={confirmed} onChange={setConfirmed} />}
       {business?.paymentDetailsAccountHolderConfirmed && <div className="note">{t('paymentDetailsHint')}</div>}
-      <button className="btn wide" type="submit" disabled={busy}>{busy ? t('saving') : t('saveSettings')}</button>
+      </>}
+      <button className="btn wide" type="submit" disabled={busy || loadingBusiness || businessFailed || !business}>{busy ? t('saving') : t('saveSettings')}</button>
     </form>
     <LinkSignInMethods locale={locale} t={t} notify={notify} accountHolder={accountHolder} />
     <section className="card"><div className="eyebrow">{accountHolder.email || accountHolder.phoneNumber}</div><button className="btn danger wide" type="button" style={{ marginTop: 12 }} disabled={signingOut} onClick={() => void signOut()}>{signingOut ? t('signingOut') : t('signOut')}</button></section>
@@ -1154,7 +1264,7 @@ function LinkSignInMethods({ locale, t, notify, accountHolder }: Pick<SharedProp
   const [code, setCode] = useState('')
   const [developmentCode, setDevelopmentCode] = useState('')
   const [busy, setBusy] = useState(false)
-  useEffect(() => { api.get<AuthConfig>('/api/v1/auth/config').then(setConfig).catch(() => {}) }, [])
+  useEffect(() => { api.get<AuthConfig>('/api/v1/auth/config').then(setConfig).catch((error) => notify(t(errorKey(error)), true)) }, [notify, t])
   const linkGoogle = async (idToken: string) => {
     setBusy(true)
     try {
@@ -1199,6 +1309,9 @@ function LinkSignInMethods({ locale, t, notify, accountHolder }: Pick<SharedProp
 
 function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refreshKey, locale }: SharedProps & { onNavigate: (page: Page) => void }) {
   const [customers, setCustomers] = useState<Customer[]>([])
+  const [loadingCustomers, setLoadingCustomers] = useState(true)
+  const [customersFailed, setCustomersFailed] = useState(false)
+  const [customerRetryKey, setCustomerRetryKey] = useState(0)
   const [customerId, setCustomerId] = useState(selectedCustomer ? String(selectedCustomer.id) : '')
   const [file, setFile] = useState<File | null>(null)
   const [keepAttachment, setKeepAttachment] = useState(false)
@@ -1215,36 +1328,50 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
   const [paidNowAmount, setPaidNowAmount] = useState('')
   const [paidNowMethod, setPaidNowMethod] = useState('CASH')
   const [paidNowConfirmed, setPaidNowConfirmed] = useState(false)
+  const [pollingError, setPollingError] = useState(false)
   const uploadKey = useRef(newIdempotencyKey())
 
   useEffect(() => {
     let active = true
+    setLoadingCustomers(true)
+    setCustomersFailed(false)
     listAllCustomers().then((result) => {
       if (!active) return
       setCustomers(result)
       const preferred = selectedCustomer && result.some((item) => item.id === selectedCustomer.id)
         ? String(selectedCustomer.id) : (result[0] ? String(result[0].id) : '')
       setCustomerId((current) => current || preferred)
-    }).catch((error) => { if (active) notify(t(errorKey(error)), true) })
+    }).catch((error) => {
+      if (active) { setCustomersFailed(true); notify(t(errorKey(error)), true) }
+    }).finally(() => { if (active) setLoadingCustomers(false) })
     return () => { active = false }
-  }, [notify, t, refreshKey, selectedCustomer?.id])
+  }, [notify, t, refreshKey, selectedCustomer?.id, customerRetryKey])
 
   useEffect(() => {
     if (scanId === null) return
     let active = true
     let timer: number | undefined
     let pollDelay = 1000
+    let pollFailureNotified = false
     const poll = async () => {
       try {
         const current = await api.get<ScanStatus>(`/api/v1/scans/${scanId}`)
         if (!active) return
+        pollFailureNotified = false
+        setPollingError(false)
         setScan(current)
         if (current.status === 'QUEUED' || current.status === 'PROCESSING') {
           timer = window.setTimeout(() => void poll(), pollDelay)
           pollDelay = Math.min(pollDelay * 1.6, 5000)
         }
       } catch (error) {
-        if (active) notify(t(errorKey(error)), true)
+        if (active) {
+          setPollingError(true)
+          if (!pollFailureNotified) notify(t(errorKey(error)), true)
+          pollFailureNotified = true
+          timer = window.setTimeout(() => void poll(), pollDelay)
+          pollDelay = Math.min(pollDelay * 1.6, 5000)
+        }
       }
     }
     void poll()
@@ -1323,7 +1450,7 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
   return <>
     {!scanId && <>
       <p className="subtle">{t('scanHint')}</p>
-      {!customers.length ? <EmptyState icon="♙" title={t('noCustomers')} detail={t('noCustomersHint')} action={<button className="btn" type="button" onClick={() => onNavigate('newCustomer')}>{t('addCustomer')}</button>} /> :
+      {loadingCustomers ? <Loading t={t} /> : customersFailed ? <LoadError t={t} onRetry={() => setCustomerRetryKey((current) => current + 1)} /> : !customers.length ? <EmptyState icon="♙" title={t('noCustomers')} detail={t('noCustomersHint')} action={<button className="btn" type="button" onClick={() => onNavigate('newCustomer')}>{t('addCustomer')}</button>} /> :
         <form className="card" onSubmit={(event) => void upload(event)}>
           <div className="field"><label htmlFor="scan-customer">{t('scanSelectCustomer')}</label><select id="scan-customer" className="control" value={customerId} onChange={(event) => setCustomerId(event.target.value)} required>
             {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.displayName}</option>)}
@@ -1347,6 +1474,7 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
           <strong>{scan?.status === 'REVIEW_REQUIRED' ? t('scanReviewRequired') : extracting ? t(!scan || scan.status === 'QUEUED' ? 'scanQueued' : 'scanProcessing') : scan?.status === 'POSTED' ? t('savedPurchase') : t('scanFailed')}</strong>
           <div className="subtle">{selected?.displayName || ''}</div>
           {extracting && <p className="subtle">{t('scanProgressHint')}</p>}
+          {extracting && pollingError && <p className="note warn" role="status">{t('scanStatusRetrying')}</p>}
         </div>
       </div>
       {scan?.status === 'FAILED' && <section className="card"><p>{t('scanFailed')}</p><button className="btn wide" type="button" onClick={() => { if (selected) { openCustomer(selected); onNavigate('purchase') } }}>{t('scanManualFallback')}</button></section>}
@@ -1409,7 +1537,17 @@ function Split({ label, value, total = false }: { label: string; value: string; 
 }
 
 function Loading({ t }: { t: (key: TranslationKey) => string }) {
-  return <div className="card subtle" role="status">{t('loading')}</div>
+  return <div className="card loading-state" role="status" aria-live="polite">
+    <span className="loading-spinner" aria-hidden="true" />{t('loading')}
+  </div>
+}
+
+function LoadError({ t, onRetry }: { t: (key: TranslationKey) => string; onRetry: () => void }) {
+  return <section className="card load-error" role="alert">
+    <span className="load-error-icon" aria-hidden="true">!</span>
+    <div><h2>{t('loadErrorTitle')}</h2><p>{t('errorGeneric')}</p></div>
+    <button className="btn secondary mini" type="button" onClick={onRetry}>{t('tryAgain')}</button>
+  </section>
 }
 
 function EmptyState({ icon, title, detail, action }: { icon: string; title: string; detail?: string; action?: ReactNode | null }) {
