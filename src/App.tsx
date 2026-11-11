@@ -237,6 +237,19 @@ export default function App() {
     return () => window.removeEventListener('popstate', handleBackNavigation)
   }, [accountHolder, booting])
 
+  useEffect(() => {
+    if (!accountHolder || booting) return
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!window.matchMedia('(min-width: 768px)').matches) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [accountHolder, booting])
+
   const stayInApp = useCallback(() => {
     if (!hasHistoryMarker(APP_HISTORY_GUARD)) {
       window.history.pushState({ [APP_HISTORY_GUARD]: true }, '')
@@ -462,6 +475,21 @@ function LoginScreen({ locale, t, notify, initialPurpose, onSignIn, onLocale, on
     notify(message, true)
   }
 
+  const handleRegisteredEmail = (error: unknown) => {
+    if (!(error instanceof ApiError) || error.code !== 'EMAIL_ALREADY_REGISTERED') return false
+    const message = t('errorEmailRegistered')
+    setPurpose('LOGIN')
+    setStep('email')
+    setChallengeId('')
+    setOtp('')
+    setDevelopmentCode('')
+    setResendAt(0)
+    setSecondsLeft(0)
+    setErrorMessage(message)
+    notify(message, true)
+    return true
+  }
+
   const requestCode = async () => {
     setBusy(true)
     setErrorMessage('')
@@ -474,7 +502,9 @@ function LoginScreen({ locale, t, notify, initialPurpose, onSignIn, onLocale, on
       setOtp('')
       setResendAt(Date.now() + response.resendAfterSeconds * 1000)
       setStep('code')
-    } catch (error) { showError(error) } finally { setBusy(false) }
+    } catch (error) {
+      if (!handleRegisteredEmail(error)) showError(error)
+    } finally { setBusy(false) }
   }
 
   const submit = async (event: FormEvent) => {
@@ -489,7 +519,9 @@ function LoginScreen({ locale, t, notify, initialPurpose, onSignIn, onLocale, on
           businessName: businessName.trim(), preferredLocale: locale },
       )
       onSignIn(response.accountHolder)
-    } catch (error) { showError(error) } finally { setBusy(false) }
+    } catch (error) {
+      if (!handleRegisteredEmail(error)) showError(error)
+    } finally { setBusy(false) }
   }
 
   const googleCredential = async (idToken: string) => {
