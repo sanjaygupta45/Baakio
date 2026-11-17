@@ -1314,11 +1314,13 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
   const [customerRetryKey, setCustomerRetryKey] = useState(0)
   const [customerId, setCustomerId] = useState(selectedCustomer ? String(selectedCustomer.id) : '')
   const [file, setFile] = useState<File | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
+  const cameraInput = useRef<HTMLInputElement>(null)
   const [keepAttachment, setKeepAttachment] = useState(false)
   const [busy, setBusy] = useState(false)
   const [scanId, setScanId] = useState<number | null>(null)
   const [scan, setScan] = useState<ScanStatus | null>(null)
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [sourceFile, setSourceFile] = useState<{ url: string; type: string } | null>(null)
   const [draftVersion, setDraftVersion] = useState<number | null>(null)
   const [occurredOn, setOccurredOn] = useState('')
   const [description, setDescription] = useState('')
@@ -1381,14 +1383,13 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
   useEffect(() => {
     let active = true
     let nextUrl: string | null = null
+    setSourceFile(null)
     if (scanId !== null && scan?.imageAvailable) {
       api.getBlob(`/api/v1/scans/${scanId}/image`).then((blob) => {
         if (!active) return
         nextUrl = URL.createObjectURL(blob)
-        setImageUrl(nextUrl)
-      }).catch(() => { if (active) setImageUrl(null) })
-    } else {
-      setImageUrl(null)
+        setSourceFile({ url: nextUrl, type: blob.type })
+      }).catch(() => { if (active) setSourceFile(null) })
     }
     return () => { active = false; if (nextUrl) URL.revokeObjectURL(nextUrl) }
   }, [scanId, scan?.imageAvailable])
@@ -1407,10 +1408,17 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
   const updateLine = (index: number, field: 'name' | 'quantity' | 'unit' | 'unitPrice', value: string) => {
     setLines((current) => current.map((line, lineIndex) => lineIndex === index ? { ...line, [field]: value } : line))
   }
+  const selectFile = (input: HTMLInputElement) => {
+    const selectedFile = input.files?.[0]
+    if (!selectedFile) return
+    setFile(selectedFile)
+    uploadKey.current = newIdempotencyKey()
+    input.value = ''
+  }
   const upload = async (event: FormEvent) => {
     event.preventDefault()
     if (!file || !customerId) { notify(t(!file ? 'scanNoFile' : 'required'), true); return }
-    if (file.size > 10 * 1024 * 1024) { notify(t('scanImageTooLarge'), true); return }
+    if (file.size > 10 * 1024 * 1024) { notify(t('scanFileTooLarge'), true); return }
     const data = new FormData()
     data.append('file', file)
     data.append('keepAttachment', String(keepAttachment))
@@ -1455,7 +1463,14 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
           <div className="field"><label htmlFor="scan-customer">{t('scanSelectCustomer')}</label><select id="scan-customer" className="control" value={customerId} onChange={(event) => setCustomerId(event.target.value)} required>
             {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.displayName}</option>)}
           </select></div>
-          <div className="field"><label htmlFor="scan-file">{t('scanPhotoLabel')}</label><input id="scan-file" className="control scan-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onChange={(event) => { setFile(event.target.files?.[0] || null); uploadKey.current = newIdempotencyKey() }} required /></div>
+          <input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf" hidden
+            onChange={(event) => selectFile(event.currentTarget)} />
+          <input ref={cameraInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden
+            onChange={(event) => selectFile(event.currentTarget)} />
+          <div className="btn-row">
+            <button className="btn secondary" type="button" onClick={() => fileInput.current?.click()} disabled={busy}>{t('scanChooseFile')}</button>
+            <button className="btn secondary" type="button" onClick={() => cameraInput.current?.click()} disabled={busy}>{t('scanTakePhoto')}</button>
+          </div>
           {file && <div className="note">{file.name} · {(file.size / (1024 * 1024)).toFixed(1)} MB</div>}
           <label className="toggle-row"><input type="checkbox" checked={keepAttachment} onChange={(event) => setKeepAttachment(event.target.checked)} /><span>{t('scanKeepAttachment')}</span></label>
           <p className="subtle">{t('scanPrivacy')}</p>
@@ -1480,7 +1495,13 @@ function ScanPage({ t, notify, openCustomer, onNavigate, selectedCustomer, refre
       {scan?.status === 'FAILED' && <section className="card"><p>{t('scanFailed')}</p><button className="btn wide" type="button" onClick={() => { if (selected) { openCustomer(selected); onNavigate('purchase') } }}>{t('scanManualFallback')}</button></section>}
       {scan?.status === 'REVIEW_REQUIRED' && scan.draft && <form onSubmit={(event) => void confirm(event)}>
         <div className="scan-review-grid">
-          <section className="card scan-original"><div className="eyebrow">{t('scanOriginal')}</div>{imageUrl ? <img src={imageUrl} alt={t('scanOriginal')} /> : <p className="subtle">{t('scanNoImage')}</p>}</section>
+          <section className="card scan-original">
+            <div className="eyebrow">{t('scanOriginal')}</div>
+            {!sourceFile ? <p className="subtle">{t('scanNoSource')}</p> :
+              sourceFile.type === 'application/pdf'
+                ? <p><a className="link-button" href={sourceFile.url} download="source-bill.pdf">{t('scanDownloadPdf')}</a></p>
+                : <img src={sourceFile.url} alt={t('scanOriginal')} />}
+          </section>
           <section className="card scan-editor"><div className="note warn">{t('scanReviewRequired')}</div>
             {(scan.draft.flags.length > 0) && <div className="note warn">{t('scanCheckFields')}{totalMismatch ? ` ${t('scanTotalMismatch')}` : ''}</div>}
             <div className="field"><label htmlFor="scan-date">{t('scanBillDate')}</label><input className="control" id="scan-date" type="date" value={occurredOn} onChange={(event) => setOccurredOn(event.target.value)} required /></div>
